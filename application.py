@@ -1199,7 +1199,7 @@ def sqlA_GET_Entries_RND():
     row = db.session.query(Entry)[rand]
 
     if row is None: 
-        row = Entry()
+        row = Entry() 
 
     return row
 
