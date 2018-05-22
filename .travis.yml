@@ -1,3 +1,11 @@
+language: python
+python:
+    - "2.7"
+
+os:
+  - linux
+
+
 deploy:
   provider: elasticbeanstalk
   access_key_id: $AWS_ACCESS_KEY_ID_DEV
