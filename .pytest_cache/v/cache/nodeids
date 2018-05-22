@@ -1,1 +1,4 @@
-[]
+[
+  "tests/test_pages.py::test_login_page", 
+  "tests/test_pages.py::test_register_page"
+]
