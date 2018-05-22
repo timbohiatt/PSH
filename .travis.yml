@@ -6,8 +6,9 @@ cache: pip
 install:
   - pip install -r requirements.txt
 
-install:
-    - make build
+script: 
+
+  - python application.py
 
 
 
