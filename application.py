@@ -38,7 +38,7 @@ application = Flask(__name__)
 
 
 if "RunEnv" in os.environ:
-        env = os.environ['RunEnv']
+        env = os.environ['RunEnv'] 
 else:
     env = 'local'
 
