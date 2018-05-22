@@ -6,8 +6,8 @@ python:
 os:
   - linux
 
-install:
-  - pip install -r requirements.txt
+#install:
+#  - pip install -r requirements.txt
 
 deploy:
     -  provider: elasticbeanstalk
