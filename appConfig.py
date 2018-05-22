@@ -71,7 +71,7 @@ class TestConfig(Config):
 
 	MYSQL_HOST = os.environ['MYSQL_HOST'] 
 	MYSQL_USER = os.environ['MYSQL_USER'] 
-	MYSQL_PASSWORD = os.environ['MYSQL_PASSWORD'] 
+	MYSQL_PASSWORD = os.environ['MYSQL_PASSWORD']  
 	MYSQL_CURSORCLASS = 'DictCursor'
 	MYSQL_DBALC = 'PSH'
 
