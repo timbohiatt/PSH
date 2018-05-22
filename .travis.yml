@@ -3,6 +3,11 @@ language: python
 
 
 
+before_deploy:
+
+  - echo "Ready To Deploy"
+
+
 deploy:
     -  provider: elasticbeanstalk
        access_key_id: $AWS_ACCESS_KEY_ID_DEV
