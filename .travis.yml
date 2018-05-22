@@ -20,7 +20,6 @@ deploy:
        app: "psh-eb-app"
        env: "psh-dev-app"
        bucket_name: "psh-s3-dev"
-       upload-dir: "source"
        on:
          branch: development
 
