@@ -1,0 +1,109 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+	<div style="padding-top: 90px;"></div>
+	<section>
+		<div class="container">
+			<div class="card-deck-wrapper">
+				<div class="card-deck mt-4">
+					<!-- 1st Place -->
+					<div class="card">
+						<div class="card-body text-center">
+							<h4>1st Place</h4>
+							<img class="blog-author-img" src="static/media/MPSH_userProfiles/{{scorecard.users[0].userName}}.jpg" alt="">
+							<h5>{{scorecard.users[0].userName}}</h5>
+							<h6>{{scorecard.users[0].firstName}} {{scorecard.users[0].lastName}}</h6>
+						</div>
+					</div>
+					<!-- 2nd Place -->
+					<div class="card">
+						<div class="card-body text-center">
+							<h4>2nd Place</h4>
+							<img class="blog-author-img" src="static/media/MPSH_userProfiles/{{scorecard.users[1].userName}}.jpg" alt="">
+							<h5>{{scorecard.users[1].userName}}</h5>
+							<h6>{{scorecard.users[1].firstName}} {{scorecard.users[1].lastName}}</h6>
+						</div>
+					</div>
+					<!-- 3rd Place -->
+					<div class="card">
+						<div class="card-body text-center">
+							<h4>3rd Place</h4>
+							<img class="blog-author-img" src="static/media/MPSH_userProfiles/{{scorecard.users[2].userName}}.jpg" alt="">
+							<h5>{{scorecard.users[2].userName}}</h5>
+							<h6>{{scorecard.users[2].firstName}} {{scorecard.users[2].lastName}}</h6>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<section>	
+		<div class="container">
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						{% for header in scorecard.headers %}
+							<th scope="col">{{header}}</th>
+						{% endfor %}
+					</tr>
+				</thead>
+				<tbody>	
+					{% for user in scorecard.users %}
+					<tr>
+						<td><div class="blog-author-img"><img src="static/media/MPSH_userProfiles/{{user.userName}}.jpg" alt=""></div></td>
+						<td>{{user.userName}}</td>
+						{% for entry in user.entries %}
+							<td>{{entry.score}}</td>
+						{% endfor %}
+						<td>Total Score: {{user.totalScore}}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>	
+	</section>
+	<!--<table class="pre-scrollable" style="width:80%">
+		<tr>
+			<td></td>
+			<td></td>
+			{% for header in scorecard.headers %}
+			<td>{{header}}</td>
+			{% endfor %}
+		</tr>
+		{% for user in scorecard.users %}
+		<tr>
+			<td><div class="blog-author-img"><img src="static/media/MPSH_userProfiles/{{user.userName}}.jpg" alt=""></div></td>
+			<td>Username: {{user.userName}}</td>
+			{% for entry in user.entries %}
+				<td>{{entry.score}}</td>
+			{% endfor %}
+			<td>Total Score: {{user.totalScore}}</td>
+		</tr>
+		{% endfor %}
+	</table>-->
+
+{% endblock%}
+
+		
+		<!--<div class="col-md-3">
+			
+		        
+	  		</div>
+	  	</div>
+		<div class="col-md-3">
+			{{score.firstName}}  {{score.lastName}} ({{score.userName}})
+		</div>
+		<div class="col-md-3">
+			{{score.userScore}}
+		</div>-->
+	
+	
+
+
+
+
+
+
+

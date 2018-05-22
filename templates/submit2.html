@@ -1,0 +1,128 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+	{% from 'includes/_formhelpers.html' import render_field %}
+
+	<header class="masthead text-center text-white d-flex" style="background-image:url('static/media/MPSH_entries/stage/{{headerEntry.imgFileName}}')">
+
+		<div class="container mt-10fluid">
+			<div class="row">
+
+				<div class="card w-50" id="steps">
+					<div class="card-header text-dark">
+						Submit Entry!
+					</div>
+
+					<img style="height:auto;width:300px;display:none" id="upload-preview"/>
+
+					<!-- Step 1  -->
+					<div class="card-body text-dark">
+	
+						<div class="row">
+						
+							<!-- Step 1 - Upload File -->
+							<div id="step-1">
+								Lets begin by adding the photo you wish to enter.
+								<div id="drop-zone" class="upload-drop-zone w-100" style="border-style: dotted; width: 18rem; height: 14rem;">
+									<div class="container">
+										<center>
+											<span id="uploadTextPlaceholder">Drag and Drop Image Here</span>
+											<img style="height:auto;width:100px;display:none;" id="uploadProcessing"/>
+										</center>
+									</div>
+								</div>
+							</div>
+
+							
+							<!-- Step - Select Competition Category -->
+							<div id="step-2" style="display:none;">
+								Which category does your entry belong to! 
+								<div class="form-group">
+									<select class="form-control" id="form_CatSelect"></select>
+								</div>
+							</div>
+
+							<!-- Step - Select Competition Category -->
+							<div id="step-3" style="display:none;">
+								Tell us about your Entry! <br>
+								<div class="form-group">
+									<label for="formField_title">Entry Title:</label>
+									<input type="text" placeholder="Entry Title" class="form-control" id="formField_title">
+								</div>
+								<div class="form-group">
+									<label for="formField_description">Entry Description:</label>
+									<input type="text" placeholder="Entry Description" class="form-control" id="formField_description">
+								</div>
+							</div>
+
+							<!-- Step - Add Title and Description to Entry -->
+							<div id="step-4" style="display:none;">
+								How about you add some tags to your entry
+								<div class="form-group">
+									<input type="text" value="" data-role="tagsinput"/>
+								</div>
+							</div>
+
+							<!-- Step - Add Title and Description to Entry -->
+							<div id="step-5" style="display:none;">
+								Where was your photo taken? We would love to add it to the game map!
+								<div class="form-group">
+									<input type="text" placeholder="Location" class="form-control" >
+								</div>
+							</div>
+
+
+							<div style="display:none;" id="step-processing">
+								Your Entry is being processed
+								<div class="form-group">
+
+								</div>
+							</div>
+
+
+							<div style="display:none;" id="step-completed">
+								<span id="result-status"></span><br>
+								<span id="result-statusText"></span>
+							</div>
+
+						</div>
+						<div class="row mt-5">
+							<div class="col" style="display:none;" id="previous-step-holder">
+								<center>
+									<button class="btn btn-sm btn-primary" id="previous-step">Previous</button>
+								</center>
+							</div>
+							<div class="col" style="display:none;" id="next-step-holder">
+								<center>
+									<button class="btn btn-sm btn-primary" id="next-step">Next</button>
+								</center>
+							</div>
+							<div class="col" style="display:none;" id="submit-step-holder">
+								<center>
+									<button class="btn btn-sm btn-primary" id="submit-step">Submit</button>
+								</center>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	
+{% endblock%}	
+
+
+
+
+{% block script %}
+	
+	
+	<script src="{{ url_for('static', filename='js/_entrySubmit2.js') }}" type="text/javascript"></script>
+	<script type="text/javascript">
+		 $('#msform').change(function(){
+		 	$('#msform').parsley().validate()
+		});
+	</script>
+
+{% endblock %}

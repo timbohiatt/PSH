@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+	<div style="padding-top: 90px;"></div>
+
+	{% if entriesAvailable %}
+
+	{% for entry in entries %}		
+		<div class="container">
+	        <div class="row">
+	          <div class="col-lg-12">
+	          	<div class="card mb-5 w-60">
+	          		<div class="blog-header">
+		    			<div class="blog-cover">
+						<div class="blog-author">
+							<div class="blog-author-img">
+			        			<img src="/static/media/MPSH_userProfiles/{{entry.uploader.userName}}.jpg" alt="">
+			      			</div>
+		        			<h3><a href="/profile/{{entry.uploader.id}}">{{entry.uploader.userName}}</a></h3>
+		      			</div>
+		      				<img class="blog-cover" src="/static/media/MPSH_entries/stage/{{entry.imgFileName}}" alt="">
+		    			</div>
+		  			</div>
+      	<div class="blog-body">
+		 	 <div class="card-deck mt-2 mb-2 border-0">
+			 	<div class="col-md-10">
+			 		<div class="text-left">
+						<div class="card-body">
+			 				<div class="blog-title">
+		     					<h1><a href="/entries/category/{{entry.category.id}}/">{{entry.category.title}}</a></h1>
+		    				</div>
+		    				<div class="blog-summary">
+		     					<p>{{entry.description}}</p>
+		    				</div>
+		    			</div>
+		    		</div>
+			 	</div>
+			 	<div class="col-md-2">
+					<div class="card text-center">
+					    <h5 class="blog-title">{{entry.category.value}}</h5>
+					    <p class="card-text">Points</p>
+					   	<h5 class="blog-title">{{entry.category.value}}</h5>
+					    <p class="card-text">Points</p>
+					</div>
+			 	</div>
+
+		  	</div>
+		  </div>
+		</div>
+      	</div>
+	  </div>
+	</div>
+
+	{% endfor %}
+
+	{% else %}
+	
+	<header  id="about" class="masthead text-center text-white d-flex" style="background-image:url('/static/media/MPSH_entries/stage/{{headerEntry.imgFileName}}')">
+      <div class="container my-auto">
+        <div class="row">
+          <div class="col-lg-10 mx-auto">
+            <h1 class="text-uppercase">
+              <strong>no entries to show</strong>
+            </h1>
+            <center><hr></center>
+          </div>
+          <div class="col-lg-8 mx-auto">
+            <p class="text-faded mb-5">Maybe it is time for you to step up your game and submit!</u></p>
+            <a class="btn btn-primary btn-xl js-scroll-trigger" href="/submitEntry">Submit Entry Now!</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+
+	{% endif %}
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+

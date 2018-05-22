@@ -1,0 +1,22 @@
+#Exclude complied Pyhton Files
+*.pyc
+*.sh
+appConfig.py
+
+#Exclude Docker File from being pushed to GIT.
+Dockerfile
+dbsandpit.*
+
+#Exclude Media Folders
+/static/media/MPSH_entries/stage/*
+/static/media/MPSH_userProfiles/*
+
+
+#Exclude Secure Directory and Content from GIT 
+/secure/
+
+#Exclude venv (Virtual Environment File) from being pushed to GIT.
+/venv/
+
+#Exclude add folder from being pushed to Git. 
+/add/

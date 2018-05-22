@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+	<header class="masthead text-center text-white d-flex" style="background-image:url('static/media/MPSH_entries/stage/{{headerEntry.imgFileName}}')">
+		<div class="container my-auto">
+        	<div class="row">
+          		<div class="col-lg-10 mx-auto">
+		          	<h2 class="section-heading">Log In To Play</h2>
+					<center><hr class="my-4"></center>
+					<form id="msform" method="POST" action="">
+						<fieldset>
+							<h2 class="fs-title">Welcome</h2>
+							<h3 class="fs-subtitle">Login, Lets Play!</h3>
+							<input type="text" name="username" placeholder="USERNAME" data-parsley-maxlength="2" />
+							<input type="password" name="password" placeholder="PASSWORD" />
+							<input type="submit" name="" class="submit action-button" value="SUBMIT" />
+						</fieldset>
+					</form>
+				</div>
+			</div>
+		</div>
+	</header>
+
+
+
+{% endblock%}
