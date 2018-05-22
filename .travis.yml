@@ -6,9 +6,7 @@ cache: pip
 install:
   - pip install -r requirements.txt
 
-before_deploy:
 
-  - echo "Ready To Deploy"
 
 deploy:
     -  provider: elasticbeanstalk
@@ -23,5 +21,3 @@ deploy:
          branch: development
 
 
-after_deploy:
-  - echo "done deploying"
