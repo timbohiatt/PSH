@@ -15,7 +15,7 @@ Cython==0.28.1
 dill==0.2.7.1
 docutils==0.14
 enum34==1.1.6
-facebook-sdk==3.0.0a0
+#facebook-sdk==3.0.0a0
 flake8==3.5.0
 Flask==0.12.2
 Flask-BabelEx==0.9.3
