@@ -8,7 +8,8 @@ install:
 
 script: 
 
-  - python application.py
+  - pytest
+
 
 deploy:
     -  provider: elasticbeanstalk
