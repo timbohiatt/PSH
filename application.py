@@ -489,6 +489,7 @@ def listScorecard():
 
     scorecard = {}
     users = []
+    headerDates = []
 
     # Get all Users in the Competition
     results = sqlA_GET_Competition_Users_FILT_compID(session["competitionID"])
@@ -759,6 +760,12 @@ def get_api_v1_photoUpload():
 	imagePath = "".join([target, filename])
 	file.save(imagePath)
 
+
+
+    #s3 = boto3Client('s3')
+    #s3.upload_file(filename, application.config["AWS_S3_ROOT"], filename)
+
+    
 
 
     # Process all the Information and formating of an Entry after saving the file locally.
