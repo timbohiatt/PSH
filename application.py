@@ -4,6 +4,8 @@ import io
 import sys
 import uuid
 import random
+import boto3
+import watchtower, logging, logging.config
 from datetime import datetime, timedelta
 from decimal import Decimal
 # Flask Imports
@@ -550,6 +552,7 @@ def listScorecard():
 
     currentRank = 1
     lastScore = 99999
+    maxRank = 0
     for result in results:
 
         if (result["totalScore"] == lastScore):
@@ -631,7 +634,15 @@ def updateEntryStatus(entry, judgement):
 
 def msg(in_msg):
     application.logger.info(in_msg)
-    return
+
+
+def awsSession():
+    session = boto3.session.Session(aws_access_key_id=application.config["AWS_ACCESS_KEY_ID"],aws_secret_access_key=application.config["AWS_SECERT_ACCESS_KEY"],region_name=application.config["AWS_DEFAULT_REGION"])
+    return session
+
+def boto3Client(service):
+    client = boto3.client(service,aws_access_key_id=application.config["AWS_ACCESS_KEY_ID"],aws_secret_access_key=application.config["AWS_SECERT_ACCESS_KEY"])#,aws_session_token=awsSession(),)
+    return client
 
 
 # ============================================================================
@@ -747,6 +758,8 @@ def get_api_v1_photoUpload():
 	filename, UUID = image_fileNameGenerator(session['userName'], "FUCKYOU", True)
 	imagePath = "".join([target, filename])
 	file.save(imagePath)
+
+
 
     # Process all the Information and formating of an Entry after saving the file locally.
 	json_data = json.dumps(processEntry(imagePath, filename, UUID))

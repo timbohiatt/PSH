@@ -115,3 +115,4 @@ uritemplate==3.0.0
 urllib3==1.22
 Werkzeug==0.14.1
 WTForms==2.1
+watchtower==0.5.3

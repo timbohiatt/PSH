@@ -36,7 +36,8 @@ class LocalConfig(Config):
 	SQLALCHEMY_DATABASE_URI = 'mysql://' + MYSQL_USER + ':' + MYSQL_PASSWORD + '@' + MYSQL_HOST + '/' + MYSQL_DBALC
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-
+	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
+	AWS_SECERT_ACCESS_KEY = os.environ['AWS_SECERT_ACCESS_KEY'] 
 
 
 
@@ -44,7 +45,6 @@ class DevelopmentConfig(Config):
 	DEBUG = True
 
 	SECRET_KEY = os.environ['AWS_SECERT_ACCESS_KEY']
-
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
 	AWS_SECERT_ACCESS_KEY = os.environ['AWS_SECERT_ACCESS_KEY'] 
 
