@@ -20,6 +20,8 @@ deploy:
        app: "psh-eb-app"
        env: "psh-dev-app"
        bucket_name: "psh-s3-dev"
+       upload-dir: source
+       skip_cleanup: false
        on:
          branch: development
     -  provider: elasticbeanstalk
@@ -30,6 +32,8 @@ deploy:
        app: "psh-eb-app"
        env: "psh-prod-app"
        bucket_name: "psh-s3-prod"
+       upload-dir: source
+       skip_cleanup: true
        on:
          branch: master
     -  provider: elasticbeanstalk
@@ -40,6 +44,8 @@ deploy:
        app: "psh-eb-app"
        env: "psh-test-app"
        bucket_name: "psh-s3-test"
+       upload-dir: source
+       skip_cleanup: false
        on:
          branch: test
 

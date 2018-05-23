@@ -9,6 +9,8 @@ class Config:
 	IMG_STAGE_DIR = 'static/media/MPSH_entries/stage/'
 	IMG_FINAL_DIR = 'static/media/MPSH_entries/final/'
 
+	AWS_S3_ROOT = os.environ['AWS_S3_ROOT']
+
 
 	GOOGLE_VISION_MIN_LABEL_SCORE = 0.60
 
