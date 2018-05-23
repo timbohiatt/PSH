@@ -1194,6 +1194,8 @@ def sqlA_GET_Entries_RND():
     #   CompetitionID
     #   SysActive = 1
     #
+
+    
     count = db.session.query(Entry).count()
     if (count >= 1):
         rand = random.randrange(0, count) 
