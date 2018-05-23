@@ -1194,15 +1194,13 @@ def sqlA_GET_Entries_RND():
     #   CompetitionID
     #   SysActive = 1
     #
-
-    rand = random.randrange(0, db.session.query(Entry).count()) 
-    row = db.session.query(Entry)[rand]
-
-
-    #provide Default Row when there is no data. 
-    if row is None: 
-        row = Entry() 
-
+    count = db.session.query(Entry).count()
+    if (count is not 0):
+        rand = random.randrange(0, count) 
+        row = db.session.query(Entry)[rand]
+    else:
+        row = Entry()
+        
     return row
 
 
