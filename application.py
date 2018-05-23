@@ -1198,6 +1198,8 @@ def sqlA_GET_Entries_RND():
     rand = random.randrange(0, db.session.query(Entry).count()) 
     row = db.session.query(Entry)[rand]
 
+
+    #provide Default Row when there is no data.
     if row is None: 
         row = Entry() 
 
