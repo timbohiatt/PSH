@@ -753,7 +753,7 @@ def get_api_v1_photoUpload():
 
 	#logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
-	msg(str("Target Directory: " + str(filename)))
+	msg(str("Target Directory: " + str(target)))
 	#print request.files['file']
 	file = request.files['file']
 	if file is not None:
