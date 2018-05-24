@@ -752,6 +752,10 @@ def get_api_v1_outstandingCategories():
 
 @application.route('/api/v1.0/photo/upload', methods=['POST'])
 def get_api_v1_photoUpload():
+
+    if not os.path.exists(os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])):
+        os.makedirs(os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR']))
+
     #logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
 	#print request.files['file']
