@@ -752,18 +752,18 @@ def get_api_v1_photoUpload():
         msg("First Time Run. Created Folder")
 
     #logAPI(request.url_rule, "START", json_obj)
-	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
+    target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
     msg(str("Target Directory: " + str(filename)))
-	#print request.files['file']
-	file = request.files['file']
+    #print request.files['file']
+    file = request.files['file']
     if file is not None:
         msg("We have a File.")
-	filename, UUID = image_fileNameGenerator(session['userName'], "FUCKYOU", True)
+    filename, UUID = image_fileNameGenerator(session['userName'], "FUCKYOU", True)
     msg(str("Filename: " + str(filename)))
     msg(str("UUID: " + str(UUID)))
-	imagePath = "".join([target, filename])
+    imagePath = "".join([target, filename])
     msg(str("Image Path: " + str(UUID)))
-	file.save(imagePath)
+    file.save(imagePath)
     msg("File Saved")
 
 
