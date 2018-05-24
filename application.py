@@ -75,7 +75,7 @@ db = SQLAlchemy(application)
 #manager = Manager(app)
 #manager.add_command('db', MigrateCommand)
 # Google API Credentials.
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "secure/googleCreds.json"
+#os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "secure/googleCreds.json"
 
 
 images = UploadSet('images', IMAGES)
