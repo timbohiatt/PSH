@@ -44,6 +44,9 @@ class LocalConfig(Config):
 class DevelopmentConfig(Config):
 	DEBUG = True
 
+	IMG_STAGE_DIR = 'opt/python/current/app/static/media/MPSH_entries/stage/'
+	IMG_FINAL_DIR = 'opt/python/current/app/static/media/MPSH_entries/final/'
+
 	SECRET_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
 	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
