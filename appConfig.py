@@ -37,16 +37,16 @@ class LocalConfig(Config):
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
-	AWS_SECERT_ACCESS_KEY = os.environ['AWS_SECERT_ACCESS_KEY'] 
+	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
 
 
 
 class DevelopmentConfig(Config):
 	DEBUG = True
 
-	SECRET_KEY = os.environ['AWS_SECERT_ACCESS_KEY']
+	SECRET_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
-	AWS_SECERT_ACCESS_KEY = os.environ['AWS_SECERT_ACCESS_KEY'] 
+	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
 
 	MYSQL_HOST = os.environ['MYSQL_HOST'] 
 	MYSQL_USER = os.environ['MYSQL_USER'] 
@@ -66,10 +66,10 @@ class TestConfig(Config):
 	DEBUG = True
 	TESTING = True
 
-	SECRET_KEY = os.environ['AWS_SECERT_ACCESS_KEY']
+	SECRET_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
-	AWS_SECERT_ACCESS_KEY = os.environ['AWS_SECERT_ACCESS_KEY'] 
+	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
 
 	MYSQL_HOST = os.environ['MYSQL_HOST'] 
 	MYSQL_USER = os.environ['MYSQL_USER'] 
@@ -87,10 +87,10 @@ class TestConfig(Config):
 class ProductionConfig(Config):
 	DEBUG = False
 
-	SECRET_KEY = os.environ['AWS_SECERT_ACCESS_KEY']
+	SECRET_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
-	AWS_SECERT_ACCESS_KEY = os.environ['AWS_SECERT_ACCESS_KEY'] 
+	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
 
 	MYSQL_HOST = os.environ['MYSQL_HOST'] 
 	MYSQL_USER = os.environ['MYSQL_USER'] 

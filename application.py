@@ -632,11 +632,11 @@ def msg(in_msg):
 
 
 def awsSession():
-    session = boto3.session.Session(aws_access_key_id=application.config["AWS_ACCESS_KEY_ID"],aws_secret_access_key=application.config["AWS_SECERT_ACCESS_KEY"],region_name=application.config["AWS_DEFAULT_REGION"])
+    session = boto3.session.Session(aws_access_key_id=application.config["AWS_ACCESS_KEY_ID"],aws_secret_access_key=application.config["AWS_SECRET_ACCESS_KEY"],region_name=application.config["AWS_DEFAULT_REGION"])
     return session
 
 def boto3Client(service):
-    client = boto3.client(service,aws_access_key_id=application.config["AWS_ACCESS_KEY_ID"],aws_secret_access_key=application.config["AWS_SECERT_ACCESS_KEY"])#,aws_session_token=awsSession(),)
+    client = boto3.client(service,aws_access_key_id=application.config["AWS_ACCESS_KEY_ID"],aws_secret_access_key=application.config["AWS_SECRET_ACCESS_KEY"])#,aws_session_token=awsSession(),)
     return client
 
 
