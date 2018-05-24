@@ -416,7 +416,7 @@ def register_CheckExistingEmailAddress(in_Email):
 
 # Check if the Username address being registered is already in the DB.
 def register_CheckExistingUsername(in_Username):
-    if (sqlA_GET_User_FILT_Username(in_Username) is None):
+    if (sqlA_GET_User_FILT_Username(in_Username) is None): 
         # Username not registered. Return Reuslts False.
         return False
     else:
