@@ -6,7 +6,7 @@ class Config:
 
 	APP_NAME = 'PSH'
 
-	IMG_STAGE_DIR = 'static/media/MPSH_entries/stage/'
+	IMG_STAGE_DIR = 'static/media/MPSH_entries/stage/' 
 	IMG_FINAL_DIR = 'static/media/MPSH_entries/final/'
 
 	AWS_S3_ROOT = os.environ['AWS_S3_ROOT']
