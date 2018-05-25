@@ -186,7 +186,7 @@ def submitEntry():
     #categories = []
     #for category in outstandingCategories:
     #    if (category.value > 1):
-    #        pTxt = "Points"
+    #        pTxt = "Points" 
     #    else:
     #        pTxt = "Point"
 
