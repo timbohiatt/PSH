@@ -17,8 +17,10 @@ deploy:
        secret_access_key:
          secure: "$AWS_SECERT_ACCESS_KEY_DEV"
        region: "ap-southeast-2"  
-       app: "psh-eb-app"
-       env: "psh-dev-app"
+       #app: "psh-eb-app"
+       app: "psh-app"
+       #env: "psh-dev-app"
+       env: "psh-dev"
        bucket_name: "psh-s3-dev"
        upload-dir: source
        skip_cleanup: false
