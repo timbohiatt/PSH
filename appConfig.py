@@ -11,7 +11,8 @@ class Config:
 
 	AWS_S3_ROOT = os.environ['AWS_S3_ROOT']
 
-	GOOGLE_APPLICATION_CREDENTIALS = "secure/googleCreds.json"
+	GOOGLE_APPLICATION_CREDENTIALS = "secure/googleCreds.json"	
+	
 	GOOGLE_VISION_MIN_LABEL_SCORE = 0.60
 
 	AWS_DEFAULT_REGION = 'ap-southeast-2'
