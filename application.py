@@ -177,7 +177,7 @@ def submitEntry():
     # Get Available Categories from DB and present them as Entry Options in the Form.
     # Categories will only be presented to the user if they have not already
     # been submitted and JUDGED as approved & the day has concluded.
-
+    #we need confitmation
     # Get List of Categoires that a User Can Submit.
     outstandingCategories = sqlA_GET_AvailableCategories_FILT_userID_compID(session['userID'], session['competitionID'])
     #outstandingCategories = sqlA_GET_AllCategories_FILT_compID(session['competitionID'])
