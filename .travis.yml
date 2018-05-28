@@ -25,30 +25,30 @@ deploy:
        skip_cleanup: true
        on:
          branch: development
-    -  provider: elasticbeanstalk
-       access_key_id: $AWS_ACCESS_KEY_ID_PROD
-       secret_access_key:
-         secure: "$AWS_SECERT_ACCESS_KEY_PROD"
-       region: "ap-southeast-2"  
-       app: "psh-eb-app"
-       env: "psh-prod-app"
-       bucket_name: "psh-s3-prod"
-       upload-dir: source
-       skip_cleanup: true
-       on:
-         branch: master
-    -  provider: elasticbeanstalk
-       access_key_id: $AWS_ACCESS_KEY_ID_TEST
-       secret_access_key:
-         secure: "$AWS_SECERT_ACCESS_KEY_TEST"
-       region: "ap-southeast-2"  
-       app: "psh-eb-app"
-       env: "psh-test-app"
-       bucket_name: "psh-s3-test"
-       upload-dir: source
-       skip_cleanup: true
-       on:
-         branch: test
+    #-  provider: elasticbeanstalk
+    #   access_key_id: $AWS_ACCESS_KEY_ID_PROD
+    #   secret_access_key:
+    #     secure: "$AWS_SECERT_ACCESS_KEY_PROD"
+    #   region: "ap-southeast-2"  
+    #   app: "psh-eb-app"
+    #   env: "psh-prod-app"
+    #   bucket_name: "psh-s3-prod"
+    #   upload-dir: source
+    #   skip_cleanup: true
+    #   on:
+    #     branch: master
+    #-  provider: elasticbeanstalk
+    #   access_key_id: $AWS_ACCESS_KEY_ID_TEST
+    #   secret_access_key:
+    #     secure: "$AWS_SECERT_ACCESS_KEY_TEST"
+    #   region: "ap-southeast-2"  
+    #   app: "psh-eb-app"
+    #   env: "psh-test-app"
+    #   bucket_name: "psh-s3-test"
+    #   upload-dir: source
+    #  skip_cleanup: true
+    #   on:
+    #     branch: test
 
 
 notifications:
