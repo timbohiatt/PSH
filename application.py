@@ -168,6 +168,7 @@ def register():
     return render_template('register.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
 
+
 # Registering a New User
 @application.route('/submitEntry', methods=['GET', 'POST'])
 @loginStatus
