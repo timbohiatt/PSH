@@ -677,6 +677,9 @@ def get_api_v1_judgeGetEntry():
 			results["entry_date"] = item.sysCreated
 			results["overallStatus"] = item.entryStatus[0].status.statusTitle
 			results["imgFileName"] = item.imgFileName
+			results["originalURL"] = item.S3imgOrgURL
+			results["smallURL"] = item.S3imgSmallURL
+			results["thumbnailURL"] = item.S3imgThumbURL
 			results["firstName"] = item.uploader.firstName
 			results["lastName"] = item.uploader.lastName
 			results["userName"] = item.uploader.userName
