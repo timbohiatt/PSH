@@ -16,6 +16,7 @@ function initItem(data){
     document.getElementById('judgmentEntryDT').innerHTML=data.Entry.entry_date;
     document.getElementById('judgmentEntryOverallStatus').innerHTML=data.Entry.overallStatus;
     var preview = document.getElementById('judgmentImg');
+    console.log(data.Entry)
     preview.src = (data.Entry.S3imgSmallURL);
     //Set Global Entry ID.
     data_entryID = data.Entry.entryID;
