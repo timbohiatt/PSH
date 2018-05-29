@@ -1373,8 +1373,10 @@ def sqlA_GET_Entries_FILT_compID_pending_notSelf_ORD_longestWait(in_competitionI
 			Entry.userID != in_userID)).all()
 	results = []
 	for entry in selection:
+		msg(str(entry))
 		if (entry.entryStatus[0].status.id in [1, 2]):
 			results.append(entry)
+		
 	return results
 
 
