@@ -4,6 +4,7 @@ import io
 import sys
 import uuid
 import random
+from PIL import Image
 import boto3
 import watchtower, logging, logging.config
 from datetime import datetime, timedelta
@@ -178,68 +179,6 @@ def submitEntry():
 	# Get Available Categories from DB and present them as Entry Options in the Form.
 	# Categories will only be presented to the user if they have not already
 	# been submitted and JUDGED as approved & the day has concluded.
-	# Showing Nigel code change
-	# Get List of Categoires that a User Can Submit.
-	outstandingCategories = sqlA_GET_AvailableCategories_FILT_userID_compID(session['userID'], session['competitionID'])
-	#outstandingCategories = sqlA_GET_AllCategories_FILT_compID(session['competitionID'])
-	#outstandingCategories = sqlA_GET_AvailableCategories_FILT_userID(session['userID'])
-
-	#categories = []
-	#for category in outstandingCategories:
-	#    if (category.value > 1):
-	#        pTxt = "Points" 
-	#    else:
-	#        pTxt = "Point"
-
-	#    categoryTitle = ("(" + str(category.value) + " " + pTxt + ") " + category.title)
-	#    categories.append((category.id, categoryTitle))
-
-	categories = outstandingCategories
-	form = form_submitEntry(request.form, obj=categories)
-	# Set the Categories for the Drop Down.
-	form.cateogryID.choices = categories
-
-	if request.method == 'POST':
-		# Will Submit Entry if POST and Validated Form.
-		target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
-		# If the file uploaded during Pre-Process rename the TMP file to final File.
-		if (os.path.isfile("".join([target, form.tmpFileName.data])) == True):
-			filename = (form.tmpFileName.data).replace('_tmp_', '', 1)
-			UUID = form.entryImageUUID.data
-			msg(form.tmpFileName.data)
-			msg(filename)
-			os.rename(("".join([target, form.tmpFileName.data])), ("".join([target, filename])))
-
-		# No File was uploaded in the "Pre-Process" so it is being uploaded now.
-		# Google Vision Will be run over the file again.
-		else:
-			for file in request.files.getlist("entryImage"):
-				filename, UUID = image_fileNameGenerator(session['userName'], form.cateogryID.data, False)
-				imagePath = "".join([target, filename])
-				file.save(imagePath)
-
-				json.dumps(processEntry(imagePath, filename, UUID))
-
-		sqlA_ADD_Entry(session['userID'], session['competitionID'], form.cateogryID.data, str(
-			form.entryTitle.data), str(form.entryDescription.data), str(UUID), str(filename))
-
-		flash('Photo Entry is Completed! Good Luck!', 'success')
-		return redirect(url_for('index'))
-
-	return render_template('submit.html', form=form, headerEntry=sqlA_GET_Entries_RND())
-
-
-
-
-# Registering a New User
-@application.route('/submitEntry2', methods=['GET', 'POST'])
-@loginStatus
-def submitEntry2():
-
-	# Category Drop Down Field.
-	# Get Available Categories from DB and present them as Entry Options in the Form.
-	# Categories will only be presented to the user if they have not already
-	# been submitted and JUDGED as approved & the day has concluded.
 
 	# Get List of Categoires that a User Can Submit.
 	outstandingCategories = sqlA_GET_AvailableCategories_FILT_userID_compID(session['userID'], session['competitionID'])
@@ -281,17 +220,16 @@ def submitEntry2():
 
 				json.dumps(processEntry(imagePath, filename, UUID))
 
+		#### S3 File Move Logic HERE!
+		imgOrgURL,imgSmallURL, imgThumbURL = processAWSS3Save(imagePath, filename, UUID)
+
 		sqlA_ADD_Entry(session['userID'], session['competitionID'], form.cateogryID.data, str(
-			form.entryTitle.data), str(form.entryDescription.data), str(UUID), str(filename))
+			form.entryTitle.data), str(form.entryDescription.data), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL)
 
 		flash('Photo Entry is Completed! Good Luck!', 'success')
 		return redirect(url_for('index'))
 
 	return render_template('submit2.html', form=form, headerEntry=sqlA_GET_Entries_RND())
-
-
-
-
 
 
 
@@ -391,6 +329,79 @@ class form_submitEntry(Form):
 # ============================================================================
 # ==SUPPPORT FUNCTIONS========================================================
 # ============================================================================
+
+#Migrate EC2 to S3
+def processAWSS3Save(imagePath, filename, UUID):
+
+	Image.MAX_IMAGE_PIXELS = 1000000000
+
+	target = os.path.join(APP_ROOT, application.config['IMG_FINAL_DIR'])
+	source = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
+
+
+	if (os.path.isfile("".join([source, filename])) == True):
+
+		s3 = boto3.client('s3', aws_access_key_id=application.config['AWS_ACCESS_KEY_ID'], aws_secret_access_key=application.config['AWS_SECRET_ACCESS_KEY'])
+		bucket = application.config['AWS_S3_ROOT']
+
+		bucket_location = s3.get_bucket_location(Bucket=bucket)
+		
+
+		originalFilename = "original_" + str(UUID)
+		smallFilename = "small_" + str(UUID)
+		thumbFilename = "thumb_" + str(UUID)
+
+		
+		originalFile = ("".join([source, filename]))
+		im = Image.open(originalFile)
+
+		#Make Original Image JPEG
+		im.save(("".join([target, originalFilename])), "JPEG")
+
+		#Make Small/Web Image JPEG
+		maxsize = (1028, 1028)
+		im.thumbnail(maxsize, Image.ANTIALIAS)
+		im.save(("".join([target, smallFilename])), "JPEG")
+
+		#Make Thumbnail Image JPEG
+		maxsize = (257, 257)
+		im.thumbnail(maxsize, Image.ANTIALIAS)
+		im.save(("".join([target, thumbFilename])), "JPEG")
+
+		#Cleanup Source File
+		os.remove(("".join([source, filename])))
+
+
+		imgOrgURL = None
+		imgSmallURL = None
+		imgThumbURL = None
+
+		#Uploading Original Image
+		msg("Uploading Original")
+		key_name = str(application.config['AWS_S3_ORGIMG']+"/"+originalFilename)
+		s3.upload_file(("".join([target, originalFilename])), bucket, key_name, ExtraArgs={'ACL': 'public-read'})
+		imgOrgURL = "https://s3-{0}.amazonaws.com/{1}/{2}".format(bucket_location['LocationConstraint'],bucket, key_name)
+		os.remove(("".join([target, originalFilename])))
+
+		#Uploading Small/Web Image
+		msg("Uploading Small/Web")
+		key_name = str(application.config['AWS_S3_SMALLIMG']+"/"+smallFilename)
+		s3.upload_file(("".join([target, smallFilename])), bucket, key_name, ExtraArgs={'ACL': 'public-read'})
+		imgSmallURL = "https://s3-{0}.amazonaws.com/{1}/{2}".format(bucket_location['LocationConstraint'],bucket, key_name)
+		os.remove(("".join([target, smallFilename])))
+
+		#Uploading Thumb Image
+		msg("Uploading Thumbnail")
+		key_name = str(application.config['AWS_S3_THUMBIMG']+"/"+thumbFilename)
+		s3.upload_file(("".join([target, thumbFilename])), bucket, key_name, ExtraArgs={'ACL': 'public-read'})
+		imgThumbURL ="https://s3-{0}.amazonaws.com/{1}/{2}".format(bucket_location['LocationConstraint'],bucket, key_name)
+		os.remove(("".join([target, thumbFilename])))
+
+		return imgOrgURL,imgSmallURL, imgThumbURL
+
+	else:
+		return None, None, None
+
 
 # Generate Photo File Name
 def image_fileNameGenerator(userID, category, tmpFlag):
@@ -692,8 +703,11 @@ def get_api_v1_entrySubmit():
 			UUID = data["UUID"]
 			os.rename(("".join([target, data["tmpFileName"]])), ("".join([target, filename])))
 
+			#### S3 File Move Logic HERE!
+			imgOrgURL,imgSmallURL, imgThumbURL = processAWSS3Save(("".join([target, filename])), filename, UUID)
+
 			sqlA_ADD_Entry(session['userID'], session['competitionID'], data["categoryID"], str(
-				data["title"]), str(data["description"]), str(UUID), str(filename))
+				data["title"]), str(data["description"]), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL)
 
 			statusCode = 200
 			status = "Upload Successful"
@@ -747,32 +761,14 @@ def get_api_v1_outstandingCategories():
 
 @application.route('/api/v1.0/photo/upload', methods=['POST'])
 def get_api_v1_photoUpload():
-	msg("Uploding File.. YAY")
-	#if not os.path.exists(os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])):
-	#    os.makedirs(os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR']))
-	#    msg("First Time Run. Created Folder")
+
 
 	#logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
-	msg(str("Target Directory: " + str(target)))
-	#print request.files['file']
 	file = request.files['file']
-	if file is not None:
-		msg("We have a File.")
 	filename, UUID = image_fileNameGenerator(session['userName'], "FUCKYOU", True)
-	msg(str("Filename: " + str(filename)))
-	msg(str("UUID: " + str(UUID)))
 	imagePath = "".join([target, filename])
-	msg(str("Image Path: " + str(UUID)))
 	file.save(imagePath)
-	msg("File Saved")
-
-
-	#s3 = boto3Client('s3')
-	#s3.upload_file(filename, application.config["AWS_S3_ROOT"], filename)
-
-	
-
 
 	# Process all the Information and formating of an Entry after saving the file locally.
 	json_data = json.dumps(processEntry(imagePath, filename, UUID))
@@ -989,6 +985,9 @@ class Entry(db.Model):
 	sysActive = db.Column(db.Integer)
 	sysCreated = db.Column(db.DateTime, default=datetime.now)
 	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+	S3imgOrgURL = db.Column(db.String(4000))
+	S3imgSmallURL = db.Column(db.String(4000))
+	S3imgThumbURL = db.Column(db.String(4000))
 	# ==[ Vitural Columns ]==
 	uploader = db.relationship("User", backref=db.backref("User", uselist=False))
 	category = db.relationship("Categories", backref=db.backref("category", uselist=False))
@@ -996,7 +995,7 @@ class Entry(db.Model):
 	entryStatus = db.relationship("EntryStatus", backref='entry')
 
 	# ==[ User Object Methods ]==
-	def __init__(self, userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, ):
+	def __init__(self, userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL ):
 		# Required
 		self.userID = userID
 		self.competitionID = competitionID
@@ -1006,6 +1005,14 @@ class Entry(db.Model):
 		self.imgUUID = imgUUID
 		self.imgFileName = imgFileName
 		self.sysActive = 1
+		self.S3imgOrgURL=imgOrgURL
+		self.S3imgSmallURL=imgSmallURL
+		self.S3imgThumbURL=imgThumbURL
+
+		msg(imgOrgURL)
+		msg(imgSmallURL)
+		msg(imgThumbURL)
+
 
 
 class EntryStatus(db.Model):
@@ -1063,11 +1070,11 @@ def sqlA_ADD_Users(userName, firstName, lastName, email, password):
 	return
 
 
-def sqlA_ADD_Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName):
+def sqlA_ADD_Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL):
 
 	# Get Status Type
 	statusType = StatusType.query.filter(and_(StatusType.id == 1, StatusType.sysActive == 1)).first()
-	newEntry = Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName)
+	newEntry = Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL)
 	db.session.add(newEntry)
 	db.session.commit()
 	newEntryStatus = EntryStatus(newEntry.id, statusType.id)
@@ -1443,10 +1450,7 @@ def sqlA_GET_User_Statistics_FILT_User_CompID(in_userID, in_competitionID):
 			,"currentScore":currentScore
 			,"currentRank":currentRank}
 
-	
 	return stats
-
-
 
 
 # ============================================================================
@@ -1457,7 +1461,6 @@ if __name__ == '__main__':
 
 	msg("Connecting to MYSQL HOST: " + str(application.config["MYSQL_HOST"]))
 	msg("Connecting to DB URI : "+ str(application.config["SQLALCHEMY_DATABASE_URI"]))
-
 
 
 	#application.secret_key = 'MP$H_2019_prd'

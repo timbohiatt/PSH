@@ -18,7 +18,11 @@
 			      			</div>
 		        			<h3><a href="/profile/{{entry.uploader.id}}">{{entry.uploader.userName}}</a></h3>
 		      			</div>
-		      				<img class="blog-cover" src="/static/media/MPSH_entries/stage/{{entry.imgFileName}}" alt="">
+		      				{% if entry.S3imgSmallURL %}
+		      					<img class="blog-cover" src="{{entry.S3imgSmallURL}}" alt="">
+		      				{% else %}
+		      					<img class="blog-cover" src="/static/img/imgNotAvailable.png" alt="">
+		      				{% endif %}
 		    			</div>
 		  			</div>
       	<div class="blog-body">

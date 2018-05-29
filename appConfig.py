@@ -10,10 +10,13 @@ class Config:
 	IMG_FINAL_DIR = 'static/media/MPSH_entries/final/'
 
 	AWS_S3_ROOT = os.environ['AWS_S3_ROOT']
+	AWS_S3_ORGIMG = "static/media/MPSH_entries/Original"
+	AWS_S3_SMALLIMG = "static/media/MPSH_entries/Small"
+	AWS_S3_THUMBIMG = "static/media/MPSH_entries/Thumbnail"
 
 	#GOOGLE_APPLICATION_CREDENTIALS = "secure/googleCreds.json"	
 
-	GOOGLE_VISION_MIN_LABEL_SCORE = 0.60
+	GOOGLE_VISION_MIN_LABEL_SCORE = 0.60 
 
 	AWS_DEFAULT_REGION = 'ap-southeast-2'
 
@@ -39,6 +42,10 @@ class LocalConfig(Config):
 
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
 	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
+
+
+
+
 
 
 

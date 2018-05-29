@@ -1,3 +1,4 @@
+Pillow==5.1.0
 alembic==0.9.9
 attrs==18.1.0
 autoflake==1.1
