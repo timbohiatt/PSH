@@ -229,7 +229,7 @@ def submitEntry():
 		flash('Photo Entry is Completed! Good Luck!', 'success')
 		return redirect(url_for('index'))
 
-	return render_template('submit2.html', form=form, headerEntry=sqlA_GET_Entries_RND())
+	return render_template('submit.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
 
 
@@ -1374,9 +1374,11 @@ def sqlA_GET_Entries_FILT_compID_pending_notSelf_ORD_longestWait(in_competitionI
 	results = []
 	for entry in selection:
 		msg(str(entry))
+		msg(str(entry.entryStatus[0].status.id))
+		msg(str(entry.title))
 		if (entry.entryStatus[0].status.id in [1, 2]):
 			results.append(entry)
-		
+
 	return results
 
 
