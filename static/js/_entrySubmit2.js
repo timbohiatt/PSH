@@ -1,33 +1,110 @@
-$(function () {
 
+var map
+var infoWindow
+var currentLocation = null;
+var mapMarkers = [];
+
+
+
+function initMap() {
+    map = new google.maps.Map(document.getElementById('entryLocationMap'), {
+      center: {lat: -34.397, lng: 150.644},
+      zoom: 6
+
+    });
+    infoWindow = new google.maps.InfoWindow;
+
+	// This event listener calls addMarker() when the map is clicked.
+	google.maps.event.addListener(map, 'click', function(event) {
+		addMarker(event.latLng, map);
+	});
+
+
+// Adds a marker to the map.
+function addMarker(location, map) {
+	// Add the marker at the clicked location, and add the next-available label
+	// from the array of alphabetical characters.
+
+		for (var i = 0; i < mapMarkers.length; i++) {
+		    mapMarkers[i].setMap(null);
+		}
+
+
+		var marker = new google.maps.Marker({
+			position: location,
+			//label: labels[labelIndex++ % labels.length],
+			map: map
+		});
+		mapMarkers.push(marker);
+		map.panTo(marker.getPosition())
+
+	}
+
+    // Try HTML5 geolocation.
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+
+        infoWindow.setPosition(pos);
+        //infoWindow.setContent('Location found.');
+        //infoWindow.open(map);
+        map.setCenter(pos);
+      }, function() {
+        handleLocationError(true, infoWindow, map.getCenter());
+      });
+    } else {
+      // Browser doesn't support Geolocation
+      handleLocationError(false, infoWindow, map.getCenter());
+    }
+}
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+	infoWindow.setPosition(pos);
+	infoWindow.setContent(browserHasGeolocation ?
+                      'Error: The Geolocation service failed.' :
+                      'Error: Your browser doesn\'t support geolocation.');
+	infoWindow.open(map);
+}
+
+
+
+
+$(function () {
 
 		var dropZone = document.getElementById('drop-zone');
 		var uploadForm = document.getElementById('js-upload-form');
 		var imageUUID = null;
 		var tmpFileName = null;
-
 		var currentStep = 1;
 		var lastStep = 5;
+
+
 
 		$('#previous-step').click(function() {
 			transitionPreviousStep()
     	});
+
 		$('#next-step').click(function() {
+			$("#step-p").css("display", "block");
 			transitionNextStep()
 			$('#next-step').css("display", "Block");
 			$('#next-step').prop('disabled', true);
     	});
+
 		$('#submit-step').click(function() {
 			submitEntry()
     	});
 
     	
-
     	function transitionNextStep(){
     		setTimeout(function(){
 				element = ("#step-" + currentStep)
-				//$(element).fadeOut("fast")
+				$(element).fadeOut("fast")
 				$(element).css("display", "None")
+				$("#step-p").css("display", "none");
 				setTimeout(function(){
 					currentStep = currentStep + 1
 					validateButtons()
@@ -39,46 +116,33 @@ $(function () {
 			}, 100);
     	}
     	function transitionPreviousStep(){
-    		setTimeout(function(){
-				element = ("#step-" + currentStep)
-				//$(element).fadeOut("fast")
-				$(element).css("display", "None")
-				setTimeout(function(){
-					currentStep = currentStep - 1
-					validateButtons()
-					validateEntryData()
-					element = ("#step-" + currentStep)
-					//$(element).fadeIn("fast")
-					$(element).css("display", "Block")
-				}, 100);
-			}, 100);
+    		element = ("#step-" + currentStep)
+    		$(element).css("display", "None")
+    		currentStep = (currentStep - 1)
+    		validateButtons()
+			validateEntryData()
+			element = ("#step-" + currentStep)
+			$(element).css("display", "Block")
     	}
 
 		function validateButtons(){
 			if (currentStep == 1){
-				$("#previous-step-holder").css("display", "None");
-				$("#next-step-holder").css("display", "None");
+				$("#previous-step").css("display", "None");
+				$("#next-step").css("display", "None");
 				$("#upload-preview").css("display", "None");
-				$("#submit-step-holder").css("display", "None");
+				$("#submit-step").css("display", "None");
 			}else if(currentStep == lastStep){
-				$("#previous-step-holder").css("display", "None");
-				$("#next-step-holder").css("display", "None");
-				$("#submit-step-holder").css("display", "Block");
+				$("#previous-step").css("display", "Block");
+				$("#next-step").css("display", "None");
+				$("#submit-step").css("display", "Block");
 			}
 			else{
-				$("#previous-step-holder").css("display", "Block");
-				$("#next-step-holder").css("display", "Block");
-				$("#submit-step-holder").css("display", "None");
+				$("#previous-step").css("display", "Block");
+				$("#next-step").css("display", "Block");
+				$("#submit-step").css("display", "None");
 			}
 
 		}
-
-		function formReset(){
-			setTimeout(function(){
-               $("#submit-step-1").fadeIn("slow")
-            }, 100);
-		}
-
 
 		$("#form_CatSelect").change(function() {
 		  	validateEntryData()
@@ -96,28 +160,21 @@ $(function () {
 			valid = false
 
 			if (currentStep == 2){
-				console.log("Validating Step 2")
-				console.log($("#form_CatSelect option:selected").val())
 				if ($("#form_CatSelect option:selected").val() != 999){	
-					console.log("Step 2 Valid")
 					valid = true;
 				}	
 			}else if (currentStep == 3){
-				console.log("Validating Step 3")
 				if	($("#formField_title").val().length >= 3){
 					if ($("#formField_description").val().length >= 5){
 						valid = true;
 					}
 				}
 			}else if (currentStep == 4){
-				console.log("Validating Step 4")
 				valid = true;
 
 			}else if (currentStep == 5){
-				console.log("Validating Step 5")
-				valid = true;
+				//valid = true;
 			}else if (currentStep == 6){
-				console.log("Validating Step 6")
 				valid = true;
 			}
 
@@ -131,12 +188,6 @@ $(function () {
 		}
 
 
-		$('#form_CatSelect').change(function() {
-        	populateCategoryRules()
-    	});
-
-		
-
 		function setupImagePreview(TMPFileName){
 			$("#upload-preview").attr("src",("/static/media/MPSH_entries/stage/"+TMPFileName))
 			//$("#upload-preview2").attr("src",("/static/media/MPSH_entries/stage/"+TMPFileName))
@@ -146,16 +197,15 @@ $(function () {
 		}
 
 
-
 		//--------- Drop Zone Configuration ---------
 		//-------------------------------------------
 		dropZone.ondrop = function(e) {
 			e.preventDefault();
 			this.className = 'upload-drop-zone';
 
-			$("#uploadTextPlaceholder").css("display", "None");
+			$("#step-1").css("display", "None");
 			$("#uploadProcessing").attr("src",("/static/img/processing.gif"))
-			$("#uploadProcessing").css("display", "block");
+			$("#step-p").css("display", "block");
 			
 			uploadPhoto(e.dataTransfer.files)
 		}
@@ -169,24 +219,37 @@ $(function () {
 			this.className = 'upload-drop-zone';
 			return false;
 		}
+
+
+		$("#uploadTextPlaceholder_Click").change(function() {
+			$("#step-1").css("display", "None");
+			$("#uploadProcessing").attr("src",("/static/img/processing.gif"))
+			$("#step-p").css("display", "block");
+			uploadPhoto($("#uploadTextPlaceholder_Click").prop('files'))
+    	});
+
 		//-------------------------------------------
-
-
 
 		function submitEntry(){
 			setTimeout(function(){
-				$("#upload-preview").fadeOut("slow")
+				 element = ("#step-" + currentStep)
+				$(element).fadeOut("fast")
+				$("#next-step").fadeOut("fast")
+				$("#previous-step").fadeOut("fast")
+				$("#submit-step").fadeOut("fast")
+				$("#upload-preview").fadeOut("fast")
+				$(element).css("display", "None")
+				$("#step-p").css("display", "Block");
+				
 				setTimeout(function(){
 					$(element).fadeOut("slow")
 					setTimeout(function(){
-						$("#step-processing").fadeIn("slow")
+						$("#step-p").fadeIn("slow")
 						title = $("#formField_title").val()
 						description = $("#formField_description").val()
 						catID = $("#form_CatSelect").val()
 						UUID = imageUUID
-						console.log(UUID, tmpFileName)
 						dataSet = {'title':title, 'description':description, 'categoryID':catID, 'UUID':UUID , 'tmpFileName':tmpFileName}
-						console.log(JSON.stringify(dataSet))
 						
 						$.ajax({
 							type: 'POST',
@@ -211,9 +274,9 @@ $(function () {
 			$("#result-status").text(status);
 			$("#result-statusText").text(statusLongText);
 			setTimeout(function(){
-				$("#step-processing").fadeOut("slow")
+				$("#step-p").fadeOut("slow")
 				setTimeout(function(){
-					$("#step-completed").fadeIn("slow")
+					$("#step-f").fadeIn("slow")
 				}, 1000);
 			}, 1000);
 		}
@@ -257,14 +320,12 @@ $(function () {
 				async: true,
 				success: function(data) {
 					data = JSON.parse(data)
-					console.log(data)
 				},
 			});
 		}
 
 
 		function uploadPhoto(file){
-
 			var form_data = new FormData()
 			form_data.append('file', file[0])
 

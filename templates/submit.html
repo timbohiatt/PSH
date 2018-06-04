@@ -4,10 +4,80 @@
 
 	{% from 'includes/_formhelpers.html' import render_field %}
 
-	<header class="masthead text-center text-white d-flex" style="background-image:url('static/media/MPSH_entries/stage/{{headerEntry.imgFileName}}')">
+	<div class="container-fluid m-5">
+		<div class="m-5"><br></div>
 
-		
-	</header>
+		<div class="row" id="pwd-container">
+			<div class="col-md-4"></div>
+			<div class="col-md-4">
+
+
+				<form role="upload">
+					<section id="upload" class="upload-form">
+						<img style="height:auto;width:300px;display:none" id="upload-preview"/>
+						<div id="step-p" style="display:none">
+							<img style="height:auto;width:100px;" id="uploadProcessing"/>
+						</div>
+						<div id="step-f" style="display:none">
+							<center>
+								<span class="h3" id="result-status"></span><br>
+								<span id="result-statusText"></span>
+							</center>
+						</div>
+
+						<div id="step-1">
+							<center>Lets begin by adding the photo you wish to enter.</center>
+							<div id="drop-zone" class="upload-drop-zone w-100" style="border-style: dotted; width: 18rem; height: 14rem;">
+								<div class="container">
+									<center>
+									<span id="uploadTextPlaceholder">Click to Add or Drag & Drop Image</span>
+									<input id="uploadTextPlaceholder_Click" type="file" accept="image/*" style="opacity: 0.0; position: absolute; top: 30%; left: 0; bottom: 0; right: 0; width: 100%; height: 14rem;" />
+									</center>
+								</div>
+							</div>
+						</div>
+
+						<div id="step-2" style="display:none">
+							
+							<select class="form-control" id="form_CatSelect"></select>   
+						</div>
+
+						<div id="step-3" style="display:none">
+
+							<div class="form-group">
+								<label for="formField_title">Entry Title:</label>
+								<input type="text" placeholder="Entry Title" class="form-control" id="formField_title">
+							</div>
+							<div class="form-group">
+								<label for="formField_description">Entry Description:</label>
+								<input type="text" placeholder="Entry Description" class="form-control" id="formField_description">
+							</div>
+						</div>
+
+						<div id="step-4" style="display:none">
+							<div class="form-group">
+								<label for="formField_title">Tag Photo Location:</label>
+								<input type="text" placeholder="Entry Title" class="form-control" id="formField_locationSearch">
+							</div>
+							<div class="h-50" id="entryLocationMap"></div>
+							HEY
+						</div>
+
+	          			<div class="span1">     
+	          				<p><input type="button" id="previous-step" style="display:none;" class="btn btn-sm btn-primary btn-block" value="Previous"></p>
+	          				<p><input type="button" id="next-step" style="display:none;" class="btn btn-sm btn-primary btn-block" value="Next"></p>
+	          				<p><input type="button" id="submit-step" style="display:none;" class="btn btn-sm btn-primary btn-block" value="Submit Entry"></p>
+	          			</div>
+						
+					</section>
+				</form>
+			
+			</div>
+
+
+
+				
+			<div class="col-md-4"></div>
 	
 {% endblock%}	
 
