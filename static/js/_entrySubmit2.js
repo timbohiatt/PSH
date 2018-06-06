@@ -1,78 +1,13 @@
 
-var map
-var infoWindow
-var currentLocation = null;
-var mapMarkers = [];
-
-
-
-function initMap() {
-    map = new google.maps.Map(document.getElementById('entryLocationMap'), {
-      center: {lat: -34.397, lng: 150.644},
-      zoom: 6
-
-    });
-    infoWindow = new google.maps.InfoWindow;
-
-	// This event listener calls addMarker() when the map is clicked.
-	google.maps.event.addListener(map, 'click', function(event) {
-		addMarker(event.latLng, map);
-	});
-
-
-// Adds a marker to the map.
-function addMarker(location, map) {
-	// Add the marker at the clicked location, and add the next-available label
-	// from the array of alphabetical characters.
-
-		for (var i = 0; i < mapMarkers.length; i++) {
-		    mapMarkers[i].setMap(null);
-		}
-
-
-		var marker = new google.maps.Marker({
-			position: location,
-			//label: labels[labelIndex++ % labels.length],
-			map: map
-		});
-		mapMarkers.push(marker);
-		map.panTo(marker.getPosition())
-
-	}
-
-    // Try HTML5 geolocation.
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        var pos = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-
-        infoWindow.setPosition(pos);
-        //infoWindow.setContent('Location found.');
-        //infoWindow.open(map);
-        map.setCenter(pos);
-      }, function() {
-        handleLocationError(true, infoWindow, map.getCenter());
-      });
-    } else {
-      // Browser doesn't support Geolocation
-      handleLocationError(false, infoWindow, map.getCenter());
-    }
-}
-
-function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-	infoWindow.setPosition(pos);
-	infoWindow.setContent(browserHasGeolocation ?
-                      'Error: The Geolocation service failed.' :
-                      'Error: Your browser doesn\'t support geolocation.');
-	infoWindow.open(map);
-}
 
 
 
 
-$(function () {
+//====================================================================================================
+// FORM RELATED FUNCTIONS
+//====================================================================================================
+
+//$(function () {
 
 		var dropZone = document.getElementById('drop-zone');
 		var uploadForm = document.getElementById('js-upload-form');
@@ -80,6 +15,8 @@ $(function () {
 		var tmpFileName = null;
 		var currentStep = 1;
 		var lastStep = 5;
+		var imageLabels = [];
+		var entryLocation = {};
 
 
 
@@ -170,17 +107,23 @@ $(function () {
 					}
 				}
 			}else if (currentStep == 4){
-				valid = true;
-
+				if( ($.trim( $('#place-name').html() ).length) >= 1 ) {
+					if( ($.trim( $('#place-address').html() ).length) >= 1 ) {
+						valid = true;
+					}
+				}
 			}else if (currentStep == 5){
-				//valid = true;
+				valid = true;
+				
 			}else if (currentStep == 6){
 				valid = true;
 			}
 
 			if (valid == true){
-				$('#next-step').prop('disabled', false);
-				$('#next-step').css("display", "Block");
+				if (currentStep != lastStep){
+					$('#next-step').prop('disabled', false);
+					$('#next-step').css("display", "Block");
+				}
 			}else{
 				$('#next-step').prop('disabled', true);
 				$('#next-step').css("display", "None");
@@ -249,7 +192,7 @@ $(function () {
 						description = $("#formField_description").val()
 						catID = $("#form_CatSelect").val()
 						UUID = imageUUID
-						dataSet = {'title':title, 'description':description, 'categoryID':catID, 'UUID':UUID , 'tmpFileName':tmpFileName}
+						dataSet = {'title':title, 'description':description, 'categoryID':catID, 'UUID':UUID , 'tmpFileName':tmpFileName, 'imageLabels': imageLabels, 'entryLocation': entryLocation}
 						
 						$.ajax({
 							type: 'POST',
@@ -279,6 +222,18 @@ $(function () {
 					$("#step-f").fadeIn("slow")
 				}, 1000);
 			}, 1000);
+		}
+
+		function populateLabels(data){
+			data = data["labels"] 
+			imageLabels = []
+			for (index = 0; index < data.length; ++index) {
+				label = data[index]["Description"].replace(/\s/g,'')
+
+				imageLabels.push(label);
+			}
+
+			
 		}
 
 
@@ -341,10 +296,205 @@ $(function () {
 					data = JSON.parse(data)
 					imageUUID = data.UUID
 					tmpFileName = data.TMPFileName
+					populateLabels(data.Vision[0])
 					populateCategories()
 					transitionNextStep()
 					setupImagePreview(data.TMPFileName)
 				},
 			});
 		}
-});
+//});
+
+
+
+
+//====================================================================================================
+//====================================================================================================
+//	MAP RELATED FUNCTIONS
+//====================================================================================================
+
+var map
+var infoWindow
+var currentLocation = null;
+var mapMarkers = [];
+var autocomplete;
+var infowindowContent;
+var infowindow;
+var geocoder;
+
+function initMap() {
+	
+    infowindow = new google.maps.InfoWindow();
+    infowindow.setContent(infowindowContent);
+	infowindowContent = document.getElementById('infowindow-content');
+	input = document.getElementById('formField_locationSearch');
+	autocomplete = new google.maps.places.Autocomplete(input)
+	infoWindow = new google.maps.InfoWindow;
+	geocoder = new google.maps.Geocoder;
+    map = new google.maps.Map(document.getElementById('entryLocationMap'), {
+      center: {lat: -34.397, lng: 150.644},
+      zoom: 6
+    });
+
+    var marker = new google.maps.Marker({
+          map: map,
+          anchorPoint: new google.maps.Point(0, -29)
+        });
+
+	// Adds a marker to the map.
+	function addMarker(location, map) {
+	// Add the marker at the clicked location, and add the next-available label
+	// from the array of alphabetical characters.
+
+		for (var i = 0; i < mapMarkers.length; i++) {
+		    mapMarkers[i].setMap(null);
+		}
+		var marker = new google.maps.Marker({
+			position: location,
+			//label: labels[labelIndex++ % labels.length],
+			map: map
+		});
+		mapMarkers.push(marker);
+		map.panTo(marker.getPosition())
+	}
+
+
+	autocomplete.addListener('place_changed', function() {
+		  clearLocationData()
+          infowindow.close();
+          marker.setVisible(false);
+          var place = autocomplete.getPlace();
+          if (!place.geometry) {
+            // User entered the name of a Place that was not suggested and
+            // pressed the Enter key, or the Place Details request failed.
+          	validateEntryData()
+            return;
+          }
+
+          // If the place has a geometry, then present it on a map.
+          if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+          } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);  // Why 17? Because it looks good.
+          }
+          addMarker(place.geometry.location, map)
+          //marker.setPosition(place.geometry.location);
+          marker.setVisible(true);
+
+          var address = '';
+          if (place.address_components) {
+            address = [
+              (place.address_components[0] && place.address_components[0].short_name || ''),
+              (place.address_components[1] && place.address_components[1].short_name || ''),
+              (place.address_components[2] && place.address_components[2].short_name || '')
+            ].join(' ');
+          }
+
+          //infowindowContent.children['place-icon'].src = place.icon;
+          setLocationData(place, address)
+          //infowindowContent.children['place-name'].textContent = place.name;
+          //infowindowContent.children['place-address'].textContent = address;
+          infowindow.open(map, marker);
+          validateEntryData()
+    });
+
+
+
+	// This event listener calls addMarker() when the map is clicked.
+	google.maps.event.addListener(map, 'click', function(event) {
+		clearLocationData()
+		//geocodeLatLng(geocoder, map, infowindow);
+		validateEntryData()
+	});
+
+    // Try HTML5 geolocation.
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+
+        infoWindow.setPosition(pos);
+        //infoWindow.setContent('Location found.');
+        //infoWindow.open(map);
+        map.setCenter(pos);
+      }, function() {
+        handleLocationError(true, infoWindow, map.getCenter());
+      });
+    } else {
+      // Browser doesn't support Geolocation
+      handleLocationError(false, infoWindow, map.getCenter());
+    }
+
+
+}
+
+
+function geocodeLatLng(geocoder, map, infowindow) {
+
+
+        //var input = document.getElementById('latlng').value;
+        //var latlngStr = input.split(',', 2);
+        //var latlng = {lat: parseFloat(latlngStr[0]), lng: parseFloat(latlngStr[1])};
+        geocoder.geocode({'location': latlng}, function(results, status) {
+          if (status === 'OK') {
+            if (results[0]) {
+              map.setZoom(11);
+              addMarker(event.latLng, map);
+              //var marker = new google.maps.Marker({
+              //  position: latlng,
+              //  map: map
+              //});
+              //infowindow.setContent(results[0].formatted_address);
+              setLocationData(place, results[0].formatted_address)
+           	  //infowindowContent.children['place-name'].textContent = "Dropped Pinn";
+              //infowindowContent.children['place-address'].textContent = results[0].formatted_address;
+              //infowindow.open(map, marker);
+            } else {
+              window.alert('No results found');
+            }
+          } else {
+            window.alert('Geocoder failed due to: ' + status);
+          }
+
+        });
+      }
+
+
+
+function setLocationData(place, address){
+          //infowindowContent.children['place-icon'].src = null
+		  infowindowContent.children['place-name'].textContent = place.name;
+          infowindowContent.children['place-address'].textContent = address;
+
+          entryLocation["place-address"] = address;
+          entryLocation["place-name"] = place.name;
+          entryLocation["place-id"] = place.place_id;
+
+
+}
+
+
+function clearLocationData(){
+          //infowindowContent.children['place-icon'].src = null
+          infowindowContent.children['place-name'].textContent = null;
+          infowindowContent.children['place-address'].textContent = null;
+}
+
+//Map Event Handler
+function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+	infoWindow.setPosition(pos);
+	infoWindow.setContent(browserHasGeolocation ?
+                      'Error: The Geolocation service failed.' :
+                      'Error: Your browser doesn\'t support geolocation.');
+	infoWindow.open(map);
+}
+
+
+
+//====================================================================================================
+// END MAP RELATED FUNCTIONS
+//====================================================================================================
+

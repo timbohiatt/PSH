@@ -63,27 +63,9 @@ application.config["RunEnv"] = env
 
 
 # Application Configuration for SQL Alchemy
-#application.config['SQLALCHEMY_DATABASE_URI'] = ac.SQLALCHEMY_DATABASE_URI
-#application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = ac.SQLALCHEMY_TRACK_MODIFICATIONS
 db = SQLAlchemy(application)
-#migrate = Migrate(app, db)
-#manager = Manager(app)
-#manager.add_command('db', MigrateCommand)
-# Google API Credentials.
-#os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "secure/googleCreds.json"
-
-
 images = UploadSet('images', IMAGES)
 
-
-# ==BD CONFIG=====================================================================
-# DB Configuration
-#application.config['IMG_STAGE_DIR'] = ac.ENTRY_IMG_STAGE_DIR
-#application.config['IMG_FINAL_DIR'] = ac.ENTRY_IMG_FINAL_DIR
-#application.config['GOOGLE_VISION_MIN_LABEL_SCORE'] = ac.GOOGLE_VISION_MIN_LABEL_SCORE
-
-# MYSQL Connection
-#mysql = MySQL(app)
 
 
 # ==WRAPPERS===================================================================
@@ -206,8 +188,6 @@ def submitEntry():
 		if (os.path.isfile("".join([target, form.tmpFileName.data])) == True):
 			filename = (form.tmpFileName.data).replace('_tmp_', '', 1)
 			UUID = form.entryImageUUID.data
-			msg(form.tmpFileName.data)
-			msg(filename)
 			os.rename(("".join([target, form.tmpFileName.data])), ("".join([target, filename])))
 
 		# No File was uploaded in the "Pre-Process" so it is being uploaded now.
@@ -377,21 +357,18 @@ def processAWSS3Save(imagePath, filename, UUID):
 		imgThumbURL = None
 
 		#Uploading Original Image
-		msg("Uploading Original")
 		key_name = str(application.config['AWS_S3_ORGIMG']+"/"+originalFilename)
 		s3.upload_file(("".join([target, originalFilename])), bucket, key_name, ExtraArgs={'ACL': 'public-read'})
 		imgOrgURL = "https://s3-{0}.amazonaws.com/{1}/{2}".format(bucket_location['LocationConstraint'],bucket, key_name)
 		os.remove(("".join([target, originalFilename])))
 
 		#Uploading Small/Web Image
-		msg("Uploading Small/Web")
 		key_name = str(application.config['AWS_S3_SMALLIMG']+"/"+smallFilename)
 		s3.upload_file(("".join([target, smallFilename])), bucket, key_name, ExtraArgs={'ACL': 'public-read'})
 		imgSmallURL = "https://s3-{0}.amazonaws.com/{1}/{2}".format(bucket_location['LocationConstraint'],bucket, key_name)
 		os.remove(("".join([target, smallFilename])))
 
 		#Uploading Thumb Image
-		msg("Uploading Thumbnail")
 		key_name = str(application.config['AWS_S3_THUMBIMG']+"/"+thumbFilename)
 		s3.upload_file(("".join([target, thumbFilename])), bucket, key_name, ExtraArgs={'ACL': 'public-read'})
 		imgThumbURL ="https://s3-{0}.amazonaws.com/{1}/{2}".format(bucket_location['LocationConstraint'],bucket, key_name)
@@ -452,8 +429,7 @@ def processEntry(imgPath, filename, UUID):
 	image = types.Image(content=content)
 
 	# Performs label detection on the uploaded image
-	msg("Running Google Vision API over new image uploaded by " + session['userName'] + ".")
-	#response = client.label_detection(image=image)
+	response = client.label_detection(image=image)
 
 	response_json = {}
 	response_json["UUID"] = UUID
@@ -465,19 +441,18 @@ def processEntry(imgPath, filename, UUID):
 
 	# Build the List of Vision Label Objects
 	vision_children_labels = []
-	#for label in response.label_annotations:
-	#    vision_label_item = {}
-	#    vision_label_item["Description"] = label.description.title()
-	#    vision_label_item["Score_Raw"] = label.score
-	#    vision_label_item["Score_Dec"] = (round(Decimal(vision_label_item["Score_Raw"]), 2) * 100)
-	#    vision_label_item["Topicality"] = label.topicality
-	#    vision_label_item["Mid"] = label.mid
-	#    if (float(vision_label_item["Score_Raw"]) >= application.config['GOOGLE_VISION_MIN_LABEL_SCORE']):
-	#        vision_label_item["Upload_Display"] = "True"
-	#    else:
-	#        vision_label_item["Upload_Display"] = "False"
-
-	#    vision_children_labels.append(vision_label_item)
+	for label in response.label_annotations:
+		vision_label_item = {}
+		vision_label_item["Description"] = label.description.title()
+		vision_label_item["Score_Raw"] = label.score
+		vision_label_item["Score_Dec"] = (round(Decimal(vision_label_item["Score_Raw"]), 2) * 100)
+		vision_label_item["Topicality"] = label.topicality
+		vision_label_item["Mid"] = label.mid
+		if (float(vision_label_item["Score_Raw"]) >= application.config['GOOGLE_VISION_MIN_LABEL_SCORE']):
+			vision_label_item["Upload_Display"] = "True"
+		else:
+			vision_label_item["Upload_Display"] = "False"
+		vision_children_labels.append(vision_label_item)
 
 	vision_objects["labels"] = vision_children_labels
 	vision_children.append(vision_objects)
@@ -711,6 +686,12 @@ def get_api_v1_entrySubmit():
 
 			sqlA_ADD_Entry(session['userID'], session['competitionID'], data["categoryID"], str(
 				data["title"]), str(data["description"]), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL)
+
+			tags = [] 
+			tags.append(session['userName'])
+
+			for item in data["imageLabels"]:
+				tags.append(item)
 
 			statusCode = 200
 			status = "Upload Successful"
