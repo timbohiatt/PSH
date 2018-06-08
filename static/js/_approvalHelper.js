@@ -61,6 +61,7 @@ function loadNextJudgment(){
         })
         .fail(function(xhr) {
             console.log('error', xhr);
+            
         });
 
 }
