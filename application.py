@@ -418,23 +418,23 @@ def processEntry(imgPath, filename, UUID):
 	msg("Attempting to process the entry and gather upload informaton.")
 	# Instantiates a client
 	client = vision.ImageAnnotatorClient()
-
+	msg("Flag - 1")
 	# The name of the image file to annotate
 	file_name = str(imgPath)
-
+	msg("Flag - 2")
 	# Loads the image into memory
 	with io.open(file_name, 'rb') as image_file:
 		content = image_file.read()
 
 	image = types.Image(content=content)
-
+	msg("Flag - 3")
 	# Performs label detection on the uploaded image
 	response = client.label_detection(image=image)
-
+	msg("Flag - 4")
 	response_json = {}
 	response_json["UUID"] = UUID
 	response_json["TMPFileName"] = filename
-
+	msg("Flag - 5")
 	vision_objects = {}
 	# where your children list will go
 	vision_children = []
@@ -448,17 +448,19 @@ def processEntry(imgPath, filename, UUID):
 		vision_label_item["Score_Dec"] = (round(Decimal(vision_label_item["Score_Raw"]), 2) * 100)
 		vision_label_item["Topicality"] = label.topicality
 		vision_label_item["Mid"] = label.mid
+		msg(str("label - " + vision_label_item["Description"]))
 		if (float(vision_label_item["Score_Raw"]) >= application.config['GOOGLE_VISION_MIN_LABEL_SCORE']):
 			vision_label_item["Upload_Display"] = "True"
 		else:
 			vision_label_item["Upload_Display"] = "False"
 		vision_children_labels.append(vision_label_item)
-
+	msg("Flag - 6")
 	vision_objects["labels"] = vision_children_labels
 	vision_children.append(vision_objects)
-
+	msg("Flag - 7")
 	response_json["Vision"] = vision_children
-
+	msg("Flag - 8")
+	msg(str(response_json))
 	#print json.dumps(response_json, sort_keys=True, indent=4, separators=(',', ': '))
 
 	return response_json
@@ -750,11 +752,14 @@ def get_api_v1_photoUpload():
 
 	#logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
+	flag("A")
 	file = request.files['file']
 	filename, UUID = image_fileNameGenerator(session['userName'], "FUCKYOU", True)
+	flag("B")
 	imagePath = "".join([target, filename])
+	flag("C")
 	file.save(imagePath)
-
+	flag("D")
 	# Process all the Information and formating of an Entry after saving the file locally.
 	json_data = json.dumps(processEntry(imagePath, filename, UUID))
 	msg("UPLOAD SUCCESSFUL RETURNING")
