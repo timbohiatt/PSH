@@ -429,7 +429,8 @@ def processEntry(imgPath, filename, UUID):
 	image = types.Image(content=content)
 	msg("Flag - 3")
 	# Performs label detection on the uploaded image
-	response = client.label_detection(image=image)
+	#response = client.label_detection(image=image)
+	response = None
 	msg("Flag - 4")
 	response_json = {}
 	response_json["UUID"] = UUID
