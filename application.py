@@ -752,14 +752,14 @@ def get_api_v1_photoUpload():
 
 	#logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
-	flag("A")
+	mgs("A")
 	file = request.files['file']
 	filename, UUID = image_fileNameGenerator(session['userName'], "FUCKYOU", True)
-	flag("B")
+	msg("B")
 	imagePath = "".join([target, filename])
-	flag("C")
+	msg("C")
 	file.save(imagePath)
-	flag("D")
+	msg("D")
 	# Process all the Information and formating of an Entry after saving the file locally.
 	json_data = json.dumps(processEntry(imagePath, filename, UUID))
 	msg("UPLOAD SUCCESSFUL RETURNING")
