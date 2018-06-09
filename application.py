@@ -415,7 +415,7 @@ def register_CheckExistingUsername(in_Username):
 
 def processEntry(imgPath, filename, UUID):
 	# Analyse the Image using Google Vision to return known information about the image store it within the Database.
-	MSG("Attempting to process the entry and gather upload informaton.")
+	msg("Attempting to process the entry and gather upload informaton.")
 	# Instantiates a client
 	client = vision.ImageAnnotatorClient()
 
