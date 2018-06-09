@@ -429,8 +429,7 @@ def processEntry(imgPath, filename, UUID):
 	image = types.Image(content=content)
 	msg("Flag - 3")
 	# Performs label detection on the uploaded image
-	#response = client.label_detection(image=image)
-	response = None
+	response = client.label_detection(image=image)
 	msg("Flag - 4")
 	response_json = {}
 	response_json["UUID"] = UUID
@@ -442,19 +441,19 @@ def processEntry(imgPath, filename, UUID):
 
 	# Build the List of Vision Label Objects
 	vision_children_labels = []
-	#for label in response.label_annotations:
-	#	vision_label_item = {}
-	#	vision_label_item["Description"] = label.description.title()
-	#	vision_label_item["Score_Raw"] = label.score
-	#	vision_label_item["Score_Dec"] = (round(Decimal(vision_label_item["Score_Raw"]), 2) * 100)
-	#	vision_label_item["Topicality"] = label.topicality
-	#	vision_label_item["Mid"] = label.mid
-	#	msg(str("label - " + vision_label_item["Description"]))
-	#	if (float(vision_label_item["Score_Raw"]) >= application.config['GOOGLE_VISION_MIN_LABEL_SCORE']):
-	#		vision_label_item["Upload_Display"] = "True"
-	#	else:
-	#		vision_label_item["Upload_Display"] = "False"
-	#	vision_children_labels.append(vision_label_item)
+	for label in response.label_annotations:
+		vision_label_item = {}
+		vision_label_item["Description"] = label.description.title()
+		vision_label_item["Score_Raw"] = label.score
+		vision_label_item["Score_Dec"] = (round(Decimal(vision_label_item["Score_Raw"]), 2) * 100)
+		vision_label_item["Topicality"] = label.topicality
+		vision_label_item["Mid"] = label.mid
+		msg(str("label - " + vision_label_item["Description"]))
+		if (float(vision_label_item["Score_Raw"]) >= application.config['GOOGLE_VISION_MIN_LABEL_SCORE']):
+			vision_label_item["Upload_Display"] = "True"
+		else:
+			vision_label_item["Upload_Display"] = "False"
+		vision_children_labels.append(vision_label_item)
 	msg("Flag - 6")
 	vision_objects["labels"] = vision_children_labels
 	vision_children.append(vision_objects)
