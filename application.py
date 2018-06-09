@@ -752,7 +752,7 @@ def get_api_v1_photoUpload():
 
 	#logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
-	mgs("A")
+	msg("A")
 	file = request.files['file']
 	filename, UUID = image_fileNameGenerator(session['userName'], "FUCKYOU", True)
 	msg("B")
