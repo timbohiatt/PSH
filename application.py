@@ -415,7 +415,7 @@ def register_CheckExistingUsername(in_Username):
 
 def processEntry(imgPath, filename, UUID):
 	# Analyse the Image using Google Vision to return known information about the image store it within the Database.
-
+	MSG("Attempting to process the entry and gather upload informaton.")
 	# Instantiates a client
 	client = vision.ImageAnnotatorClient()
 
@@ -746,6 +746,7 @@ def get_api_v1_outstandingCategories():
 @application.route('/api/v1.0/photo/upload', methods=['POST'])
 def get_api_v1_photoUpload():
 
+	msg("Attempting to Check the HTTPS Upload API")
 
 	#logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
@@ -756,6 +757,7 @@ def get_api_v1_photoUpload():
 
 	# Process all the Information and formating of an Entry after saving the file locally.
 	json_data = json.dumps(processEntry(imagePath, filename, UUID))
+	msg("UPLOAD SUCCESSFUL RETURNING")
 	return str(json_data)
 	#return "String Test"
 
