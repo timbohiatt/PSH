@@ -459,7 +459,7 @@ def processEntry(imgPath, filename, UUID):
 	vision_children.append(vision_objects)
 	msg("Flag - 7")
 	response_json["Vision"] = vision_children
-	msg("Flag - 8")
+	msg("Flag - 8") 
 	msg(str(response_json))
 	#print json.dumps(response_json, sort_keys=True, indent=4, separators=(',', ': '))
 
