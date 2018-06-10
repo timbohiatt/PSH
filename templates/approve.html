@@ -5,8 +5,64 @@
 {% block body %}
 		<div style="padding-top: 90px;"></div>
 
-		<h1>Scav Hunt Entries</h1>
+		<div id="Entries" class="container-fluid m-5">
+			<div class="m-5"><br></div>
 
+			<div class="row">
+				<div class="col-md-4">			
+				</div>
+				<div class="col-md-4">
+					<section>
+						<div class="row">
+							<div class="col-md-4">
+								<img style="height:auto;width:100px;display:none;" id="uploadProcessing"/>
+								<img style="height:auto;width:300px;display:none;" id="judgmentImg"/>
+							</div>
+							<div class="col-md-4">
+								
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-4">
+								<div class="span1">     
+	          						<p><input type="button" id="judge-approve" class="btn btn-sm btn-primary btn-block" value="Approve"></p>
+	          						<p><input type="button" id="judge-reject" class="btn btn-sm btn-primary btn-block" value="Reject"></p>
+	          					</div>
+							</div>
+							<div class="col-md-4">
+
+							</div>
+						</div>
+					</section>
+				</div>
+				<div class="col-md-4">
+					
+				</div>
+			</div>
+		</div>
+
+
+		<div id="noEntries" class="container-fluid m-5" style="display:none;">
+			<div class="m-5"><br></div>
+
+			<div class="row" id="pwd-container">
+				<div class="col-md-4">
+					
+				</div>
+				<div class="col-md-4">
+					<section>
+						There are currently no entries to Judge. Check Back later!
+					</section>
+				</div>
+				<div class="col-md-4">
+					
+				</div>
+			</div>
+		</div>
+
+
+
+		<!--	
 		<section>
 		  <div class="container" id="entryContainer" style="display:none;"">
 		    <div class="row">
@@ -24,9 +80,9 @@
 					<div id="judgmentEntryDT"></div>
 				<div id="judgmentEntryOverallStatus"></div>
 		            <p class="card-text" id="judgmentDescription"></p>
-		            <p class="card-text" id="judgmentPointValue"></p>
+		            <p class="card-text" id="judgmentPointValue"></p>-->
 		            <!--<a href="#" class="btn btn-primary">Read More</a>-->
-		          </div>
+		 <!--         </div>
 		        </div>
 		      </div>
 		      <div class="col-md-6">
@@ -37,32 +93,12 @@
 		</section>
 
 
-		<div class="container" id="noEntryContainer" style="display:none;">
-		    <div class="row">
-		      <div class="col-md-6">
-		      	<div class="card">
-		      		<div class="card-block">
-		      			<h4 class="card-title">There are currently no entries to Judge. Check Back later!</h4>
-		      		</div>
-		      	</div>
-			  </div>
-		    </div>
-		  </div>
-		</section>
+		
 
 
 
 
-		<div class="card" max-height="70%" id="judgmentControls" style="display:none;">
-			<div class="products">
-			</div>
-		 	<div class="footer">
-		 		<a class="btn" id="prev" href="#" ripple="" ripple-color="#d3d3d3">Prev</a>
-		 		<a class="btn" href="javascript:processApproval(1);">Approve</a>
-		 		<a class="btn" href="javascript:processApproval(0);">Reject</a>
-		 		<a class="btn" id="next" href="#" ripple="" ripple-color="#d3d3d3">Next</a>
-		 	</div>
-		</div>
+		-->
 
 {% endblock%}
 

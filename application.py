@@ -415,26 +415,20 @@ def register_CheckExistingUsername(in_Username):
 
 def processEntry(imgPath, filename, UUID):
 	# Analyse the Image using Google Vision to return known information about the image store it within the Database.
-	msg("Attempting to process the entry and gather upload informaton.")
 	# Instantiates a client
 	client = vision.ImageAnnotatorClient()
-	msg("Flag - 1")
 	# The name of the image file to annotate
 	file_name = str(imgPath)
-	msg("Flag - 2")
 	# Loads the image into memory
 	with io.open(file_name, 'rb') as image_file:
 		content = image_file.read()
 
 	image = types.Image(content=content)
-	msg("Flag - 3")
 	# Performs label detection on the uploaded image
 	response = client.label_detection(image=image)
-	msg("Flag - 4")
 	response_json = {}
 	response_json["UUID"] = UUID
 	response_json["TMPFileName"] = filename
-	msg("Flag - 5")
 	vision_objects = {}
 	# where your children list will go
 	vision_children = []
@@ -454,12 +448,9 @@ def processEntry(imgPath, filename, UUID):
 		else:
 			vision_label_item["Upload_Display"] = "False"
 		vision_children_labels.append(vision_label_item)
-	msg("Flag - 6")
 	vision_objects["labels"] = vision_children_labels
 	vision_children.append(vision_objects)
-	msg("Flag - 7")
 	response_json["Vision"] = vision_children
-	msg("Flag - 8") 
 	msg(str(response_json))
 	#print json.dumps(response_json, sort_keys=True, indent=4, separators=(',', ': '))
 
@@ -747,22 +738,14 @@ def get_api_v1_outstandingCategories():
 
 @application.route('/api/v1.0/photo/upload', methods=['POST'])
 def get_api_v1_photoUpload():
-
-	msg("Attempting to Check the HTTPS Upload API")
-
 	#logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
-	msg("A")
 	file = request.files['file']
-	filename, UUID = image_fileNameGenerator(session['userName'], "FUCKYOU", True)
-	msg("B")
+	filename, UUID = image_fileNameGenerator(session['userName'], "?", True)
 	imagePath = "".join([target, filename])
-	msg("C")
 	file.save(imagePath)
-	msg("D")
 	# Process all the Information and formating of an Entry after saving the file locally.
 	json_data = json.dumps(processEntry(imagePath, filename, UUID))
-	msg("UPLOAD SUCCESSFUL RETURNING")
 	return str(json_data)
 	#return "String Test"
 
@@ -1361,11 +1344,11 @@ def sqlA_GET_Entries_FILT_compID_pending_notSelf_ORD_longestWait(in_competitionI
 			Entry.userID != in_userID)).all()
 	results = []
 	for entry in selection:
-		msg(str(entry))
-		msg(str(entry.entryStatus[0].status.id))
-		msg(str(entry.title))
 		if (entry.entryStatus[0].status.id in [1, 2]):
-			results.append(entry)
+			if entry.S3imgSmallURL is not None:
+				alreadyApproved = sqlA_GET_EntryApprovals_FUNC_Count_FILT_EntryID_UserID(entry.id, in_userID)
+				if (alreadyApproved < 1):
+					results.append(entry)
 
 	return results
 
@@ -1399,6 +1382,22 @@ def sqlA_GET_Entry_FUNC_Count_FILT_Rejections(in_EntryID):
 			EntryApprovals.entry == in_EntryID))
 	countRejections = entryRejections.statement.with_only_columns([db.func.count()]).order_by(None)
 	return db.session.execute(countRejections).scalar()
+
+
+def sqlA_GET_EntryApprovals_FUNC_Count_FILT_EntryID_UserID(in_EntryID, in_ApproverID):
+
+	entryApprovals = db.session.query(EntryApprovals).filter(
+		and_(
+			EntryApprovals.sysActive == 1,
+			EntryApprovals.ApproverID == in_ApproverID,
+			EntryApprovals.entry == in_EntryID))
+	stmt = entryApprovals.statement.with_only_columns([db.func.count()]).order_by(None)
+	entryApprovals = db.session.execute(stmt).scalar()
+	return entryApprovals
+
+	
+
+
 
 
 def sqlA_GET_User_Statistics_FILT_User_CompID(in_userID, in_competitionID):
