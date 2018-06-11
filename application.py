@@ -12,6 +12,8 @@ from decimal import Decimal
 # Flask Imports
 from flask import Flask, flash, json, jsonify, redirect, render_template, request, session, url_for
 from flask_uploads import UploadSet, IMAGES
+from flask_mail import Message, Mail
+
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 # WTForms Imports
 from wtforms import FileField, Form, PasswordField, SelectField, StringField, validators
@@ -40,6 +42,7 @@ application = Flask(__name__)
 
 
 
+
 if "RunEnv" in os.environ:
 		env = os.environ['RunEnv'] 
 else:
@@ -59,7 +62,8 @@ else:
 
 application.config["RunEnv"] = env
 
-
+#Load Mail Configuration
+mail = Mail(application)
 
 
 # Application Configuration for SQL Alchemy
@@ -71,8 +75,6 @@ images = UploadSet('images', IMAGES)
 # ==WRAPPERS===================================================================
 @application.before_request
 def before_request():
-	msg(application.config['RunEnv'])
-	msg(request.url)
 	if (application.config['RunEnv'] is not "local"):
 	    if request.url.startswith('http://'):
 	        url = request.url.replace('http://', 'https://', 1)
@@ -152,6 +154,7 @@ def entry(entryID):
 # Registering a New User
 @application.route('/register', methods=['GET', 'POST'])
 def register():
+	#mail_send_TestEmail()
 	form = form_userRegistation(request.form)
 	if request.method == 'POST' and form.validate():
 		sqlA_ADD_Users(form.userName.data, form.firstName.data, form.lastName.data,
@@ -1482,9 +1485,16 @@ def sqlA_GET_User_Statistics_FILT_User_CompID(in_userID, in_competitionID):
 # ============================================================================
 
 def mail_send_UserRegistration():
+	mail_send_TestEmail()
 	return
 
 
+def mail_send_TestEmail():
+	msg("Sending Test Message")
+	mail_msg = Message("Hello World",sender=("Photo Scavenger Hunt", "webmaster@photoscavhunt.com"),recipients=["timbohiatt@gmail.com"])
+	mail_msg.subject ="Welcome to the Hunt"
+	mail.send(mail_msg)
+	return
 
 
 

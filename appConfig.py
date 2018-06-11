@@ -23,6 +23,21 @@ class Config:
 	SQLALCHEMY_TRACK_MODIFICATIONS = False	
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+	#Email Configuration.
+	MAIL_SERVER = "pikachu.zuver.net.au"
+	MAIL_PORT = 465
+	MAIL_USE_TLS = False
+	MAIL_USE_SSL = True
+	#MAIL_DEBUG : default app.debug
+	MAIL_USERNAME = os.environ['MAIL_USERNAME']
+	MAIL_PASSWORD = os.environ['MAIL_PASSWORD']
+
+	#MAIL_DEFAULT_SENDER : default None
+	#MAIL_MAX_EMAILS : default None
+	#MAIL_SUPPRESS_SEND : default app.testing
+	#MAIL_ASCII_ATTACHMENTS : default False
+
+
 
 class LocalConfig(Config):
 	DEBUG = True
