@@ -69,6 +69,14 @@ images = UploadSet('images', IMAGES)
 
 
 # ==WRAPPERS===================================================================
+@application.before_request
+def before_request():
+    if request.url.startswith('http://'):
+        url = request.url.replace('http://', 'https://', 1)
+        code = 301
+        return redirect(url, code=code)
+
+
 def loginStatus(f):
 	@wraps(f)
 	def wrap(*args, **kwargs):
@@ -145,6 +153,9 @@ def register():
 	if request.method == 'POST' and form.validate():
 		sqlA_ADD_Users(form.userName.data, form.firstName.data, form.lastName.data,
 					   form.email.data, sha256_crypt.encrypt(str(form.password.data)))
+
+		mail_send_UserRegistration()
+
 		flash('User Sign up is Completed! Please Login.', 'success')
 		return redirect(url_for('login'))
 
@@ -1461,6 +1472,18 @@ def sqlA_GET_User_Statistics_FILT_User_CompID(in_userID, in_competitionID):
 			,"currentRank":currentRank}
 
 	return stats
+
+# ============================================================================
+# ============================================================================
+# MAIL FUNCTIONS
+# ============================================================================
+
+def mail_send_UserRegistration():
+	return
+
+
+
+
 
 
 # ============================================================================
