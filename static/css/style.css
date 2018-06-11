@@ -542,6 +542,8 @@ body {
 }
 
 
+
+
 //------- NEW UPLAOD FORM.
 
 @CHARSET "UTF-8";
@@ -565,7 +567,7 @@ http://www.bootstrapzen.com/item/135/simple-login-form-logo/
   outline: none;
 }
 
-  .form-control {
+.form-control {
     position: relative;
     font-size: 16px;
     height: auto;
@@ -642,4 +644,19 @@ form[role=upload] {
 .upload-drop-zone.drop {
   color: #222;
   border-color: #222;
+}
+
+
+
+
+
+//------- NEW JUDGMENT FORM. 
+.judgement-Content {
+  color: #5d5d5d;
+  background: #f2f2f2;
+  padding: 26px;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  z-index: 1000;
 }

@@ -4,40 +4,64 @@ data_entryID = null;
 
 window.onload = function() {
     $("#uploadProcessing").attr("src",("/static/img/processing.gif"))
+    $('#judge-rejectConfirm').prop('disabled', true);
     loadNextJudgment()
 };
 
+
+$('#judge-reject-comment').keyup(function() {
+    if ($(this).val().length >= 40){ 
+        $("#validation-text").removeClass();
+        $("#validation-text").css({fontSize: 12});
+        $("#validation-text").addClass("text-success");
+        $('#validation-text').html("Your comment is a valid length.")
+        $('#judge-rejectConfirm').prop('disabled', false)
+    }
+    else{
+        $("#validation-text").removeClass();
+        $("#validation-text").css({fontSize: 12});
+        $("#validation-text").addClass("text-danger");
+        $('#validation-text').html("Your comment is to short.")
+        $('#judge-rejectConfirm').prop('disabled', true)
+    }
+});
 
 $('#judge-approve').click(function() {
     processApproval(1)
 });
 
 $('#judge-reject').click(function() {
+    $("#judgementControls").css("display", "none");
+    $("#rejectionControls").css("display", "block");
+    //processApproval(0)
+});
+
+$('#judge-rejectConfirm').click(function() {
     processApproval(0)
+});
+
+$('#judge-rejectCancel').click(function() {
+    $("#rejectionControls").css("display", "none");
+    $("#judgementControls").css("display", "block");
+    $('#judge-rejectConfirm').prop('disabled', true)
+    $('#judge-reject-comment').val("")
 });
 
 
 
 
 function initItem(data){
-    console.log(data.Entry)
-    //document.getElementById('judgmentTitle').innerHTML=data.Entry.entryTitle;
-    //document.getElementById('judgmentDescription').innerHTML=data.Entry.entryDescription;
-    //document.getElementById('judgmentPointValue').innerHTML=data.Entry.entryTitle;
-    //document.getElementById('judgmentCategory').innerHTML=data.Entry.entryTitle;
-    //document.getElementById('judgmentEntryDT').innerHTML=data.Entry.entry_date;
-    //document.getElementById('judgmentEntryOverallStatus').innerHTML=data.Entry.overallStatus;
     var preview = document.getElementById('judgmentImg');
     preview.src = (data.Entry.smallURL);
-    //Set Global Entry ID.
     data_entryID = data.Entry.entryID;
    
 }
 
 
 function loadNextJudgment(){
-    $("#judgmentImg").css("display", "none");
-    $("#uploadProcessing").css("display", "block");
+    $("#Entries").css("display", "none");
+    $("#Processing").css("display", "block");
+    $('#judge-reject-comment').val("")
 
     form_data = {}
 
@@ -53,18 +77,14 @@ function loadNextJudgment(){
         //success: function(data) {
             //When Entires Are Available to Judge 
             if (data.Entries == true){
-                console.log(data.Entry.smallURL)
                 if (data.Entry.smallURL != null) {
                     $(function() {
                         initItem(data)
                     }).promise().done(function(){
-                        $("#uploadProcessing").css("display", "none");
-                        $("#judgmentImg").css("display", "block");
-                        //$("#entryContainer").fadeIn("slow").promise().done(function(){
-                        //    setTimeout(function(){
-                        //        $("#judgmentControls").fadeIn("slow")
-                        //    }, 500);
-                        //});
+                        //data = JSON.parse(data)
+                        setupJudgment(data)
+                        $("#Processing").css("display", "none");
+                        $("#Entries").css("display", "block");
                     });  
                 }
                 else{
@@ -84,11 +104,21 @@ function loadNextJudgment(){
 
 }
 
+function setupJudgment(data){
+    $("#entry-catTitle").html(data.Entry.categoryTitle);
+    $("#entry-catDescription").html(data.Entry.categoryDescription);
+    $("#entry-catValue").html(data.Entry.categoryValue);
+    
+}
+
 
 
 function processApproval(judgment) {
+    $("#Entries").css("display", "none");
+    $("#Processing").css("display", "block");
+    
 
-    var message = ""
+    var message = $('#judge-reject-comment').val()
     $.ajax({
             url: '/api/v1.0/entry/approve',
             data:{
@@ -102,7 +132,6 @@ function processApproval(judgment) {
             },
             error: function(error) {
                 console.log(error);
-                //alert("Error: We could not reach the Server.");
                 loadNextJudgment();
             }
         }); 

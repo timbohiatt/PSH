@@ -652,6 +652,11 @@ def get_api_v1_judgeGetEntry():
 			results["lastName"] = item.uploader.lastName
 			results["userName"] = item.uploader.userName
 			results["entryID"] = item.id
+			category = sqlA_GET_AllCategories_FILT_compID_catID(session['competitionID'], item.categoryID)
+			results["categoryID"] = category.id
+			results["categoryValue"] = category.value
+			results["categoryTitle"] = category.title
+			results["categoryDescription"] = category.description
 			entries = True
 	# Returning a New Entry to be judged.
 	return jsonify({'Entry': results, 'Entries': entries})
@@ -703,7 +708,7 @@ def get_api_v1_entryApprove():
 		judgment = 1
 	else:
 		judgment = -1
-
+	msg(request.form["msg"])
 	sqlA_ADD_Approval(request.form["entryID"], session["userID"], judgment, request.form["msg"])
 
 	# AJAX Request from Client to Approve a Single Entry.
@@ -731,9 +736,9 @@ def get_api_v1_outstandingCategories():
 		else:
 			pTxt = "Point"
 
+		categoryValue = (str(category.value) + " " + pTxt)
 		categoryTitle = ("(" + str(category.value) + " " + pTxt + ") " + category.title)
-		categories.append((category.id, categoryTitle))
-
+		categories.append((category.id, categoryTitle, category.description, category.value, category.title))
 	return json.dumps(categories)
 
 @application.route('/api/v1.0/photo/upload', methods=['POST'])
@@ -741,7 +746,7 @@ def get_api_v1_photoUpload():
 	#logAPI(request.url_rule, "START", json_obj)
 	target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
 	file = request.files['file']
-	filename, UUID = image_fileNameGenerator(session['userName'], "?", True)
+	filename, UUID = image_fileNameGenerator(session['userName'], "", True)
 	imagePath = "".join([target, filename])
 	file.save(imagePath)
 	# Process all the Information and formating of an Entry after saving the file locally.
@@ -1122,7 +1127,18 @@ def sqlA_GET_AllCategories_FILT_compID(in_competitionID):
 	# Filter:
 	#	CompetitionID
 	#	SysActive = 1
-	categories = Categories.query.filter(and_(Competition.id == in_competitionID, Competition.sysActive == 1)).all()
+	categories = Categories.query.filter(and_(Categories.id == in_competitionID, Categories.sysActive == 1)).all()
+	return categories
+
+def sqlA_GET_AllCategories_FILT_compID_catID(in_competitionID,in_categoryID):
+	msg(in_competitionID)
+	msg(in_categoryID)
+	# Return Categories.
+	# Filter:
+	#	CompetitionID
+	#	SysActive = 1
+	categories = Categories.query.filter(and_(Categories.id == in_categoryID, Competition.id == in_competitionID, Categories.sysActive == 1)).first()
+	msg(categories)
 	return categories
 
 

@@ -17,6 +17,7 @@
 		var lastStep = 5;
 		var imageLabels = [];
 		var entryLocation = {};
+		var categoryData = null;
 
 
 
@@ -82,6 +83,9 @@
 		}
 
 		$("#form_CatSelect").change(function() {
+			$("#category-detail-description-title").css("display", "Block");
+			$("#category-detail-title").html(categoryData[($(this).prop('selectedIndex')-1)][4])
+			$("#category-detail-description").html(categoryData[($(this).prop('selectedIndex')-1)][2])
 		  	validateEntryData()
 		});
 		$("#formField_title").keyup(function() {
@@ -101,10 +105,34 @@
 					valid = true;
 				}	
 			}else if (currentStep == 3){
-				if	($("#formField_title").val().length >= 3){
-					if ($("#formField_description").val().length >= 5){
+				if	($("#formField_title").val().length >= 8){
+					
+					$("#validation-text-title").removeClass();
+			        $("#validation-text-title").css({fontSize: 12});
+			        $("#validation-text-title").addClass("text-success");
+			        $('#validation-text-title').html("Good Title!")
+
+					if ($("#formField_description").val().length >= 15){
+
+						$("#validation-text-description").removeClass();
+			        	$("#validation-text-description").css({fontSize: 12});
+			        	$("#validation-text-description").addClass("text-success");
+			        	$('#validation-text-description').html("Good Description!")
+
+
 						valid = true;
+					}else{
+						$("#validation-text-description").removeClass();
+			        	$("#validation-text-description").css({fontSize: 12});
+			        	$("#validation-text-description").addClass("text-danger");
+			        	$('#validation-text-description').html("Provide a description for your entry. Tell us about it or how you got your shot.")
+
 					}
+				}else{
+			        $("#validation-text-title").removeClass();
+			        $("#validation-text-title").css({fontSize: 12});
+			        $("#validation-text-title").addClass("text-danger");
+			        $('#validation-text-title').html("Provide a good title for your entry.")
 				}
 			}else if (currentStep == 4){
 				if( ($.trim( $('#place-name').html() ).length) >= 1 ) {
@@ -249,6 +277,7 @@
 				async: true,
 				success: function(data) {
 					data = JSON.parse(data)
+					categoryData = data
 					$("#form_CatSelect").append("<option value='"+999+"'>Select Photo Category</option>");
 					for (index = 0; index < data.length; ++index) {
     					$("#form_CatSelect").append("<option value='"+data[index][0]+"'>"+data[index][1]+"</option>");
