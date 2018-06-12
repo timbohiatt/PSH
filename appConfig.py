@@ -6,8 +6,11 @@ class Config:
 
 	APP_NAME = 'PSH'
 
+	HTTP_ROOT = os.environ['HTTP_ROOT']
+
 	IMG_STAGE_DIR = 'static/media/MPSH_entries/stage/' 
 	IMG_FINAL_DIR = 'static/media/MPSH_entries/final/'
+	MAIL_TEMPLATE_DIR = 'static/mail/'
 
 	AWS_S3_ROOT = os.environ['AWS_S3_ROOT']
 	AWS_S3_ORGIMG = "static/media/MPSH_entries/Original"
@@ -24,10 +27,10 @@ class Config:
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 	#Email Configuration.
-	MAIL_SERVER = "pikachu.zuver.net.au"
-	MAIL_PORT = 465
-	MAIL_USE_TLS = False
-	MAIL_USE_SSL = True
+	MAIL_SERVER = os.environ['SMTP_SERVER']
+	MAIL_PORT = os.environ['SMTP_PORT']
+	MAIL_USE_TLS = False #os.environ['MAIL_TLS']
+	MAIL_USE_SSL = os.environ['MAIL_SSL']
 	#MAIL_DEBUG : default app.debug
 	MAIL_USERNAME = os.environ['MAIL_USERNAME']
 	MAIL_PASSWORD = os.environ['MAIL_PASSWORD']
@@ -45,8 +48,8 @@ class LocalConfig(Config):
 	SECRET_KEY = 'MP$H_2019_prd'
 
 	MYSQL_HOST = 'localhost'
-	MYSQL_USER = 'root'
-	MYSQL_PASSWORD = 'Condor14!'
+	MYSQL_USER = os.environ['MYSQL_USER'] 
+	MYSQL_PASSWORD = os.environ['MYSQL_PASSWORD']
 	MYSQL_CURSORCLASS = 'DictCursor'
 	#MYSQL_DB = 'MPSH'
 	MYSQL_DBALC = 'PSH'

@@ -76,10 +76,10 @@ images = UploadSet('images', IMAGES)
 @application.before_request
 def before_request():
 	if (application.config['RunEnv'] is not "local"):
-	    if request.url.startswith('http://'):
-	        url = request.url.replace('http://', 'https://', 1)
-	        code = 301
-	        return redirect(url, code=code)
+		if request.url.startswith('http://'):
+			url = request.url.replace('http://', 'https://', 1)
+			code = 301
+			return redirect(url, code=code)
 
 
 def loginStatus(f):
@@ -154,13 +154,20 @@ def entry(entryID):
 # Registering a New User
 @application.route('/register', methods=['GET', 'POST'])
 def register():
-	#mail_send_TestEmail()
 	form = form_userRegistation(request.form)
 	if request.method == 'POST' and form.validate():
-		sqlA_ADD_Users(form.userName.data, form.firstName.data, form.lastName.data,
+		msg("Made it here again")
+		newUser = sqlA_ADD_Users(form.userName.data, form.firstName.data, form.lastName.data,
 					   form.email.data, sha256_crypt.encrypt(str(form.password.data)))
+		
+		GUID = newUUID = uuid.uuid4().hex
+		msg("=====$&##O&)#)#*")
+		msg(newUser.id)
+		msg(GUID)
+		msg("=====$&##O&)#)#*")
 
-		mail_send_UserRegistration()
+		sqlA_ADD_GUIDRequest(GUID, 1, newUser.id) # 1 = Activate User
+		mail_send_UserRegistration(newUser, GUID)
 
 		flash('User Sign up is Completed! Please Login.', 'success')
 		return redirect(url_for('login'))
@@ -242,6 +249,7 @@ def profile(userID):
 
 
 @application.route('/logout')
+@loginStatus
 def logout():
 
 	msg("User " + session['userName'] + " Logging Out!")
@@ -293,6 +301,40 @@ def login():
 
 	# Return Loign Screen as Default Route.
 	return render_template('login.html', headerEntry=sqlA_GET_Entries_RND())
+
+
+@application.route('/register/activation/<string:regGUID>/')
+def accountActivate(regGUID):
+	msg("Running")
+	msg(regGUID)
+	currentAction = sqlA_GET_GUIDRequest(regGUID, 1) #1 = User Activation
+	msg(currentAction)
+	if currentAction is not None:
+		msg("Going to process the GUID Action")
+		msg(currentAction.objectID)
+		currentUser = sqlA_GET_User_FILT_id_inactive(currentAction.objectID)
+		msg(currentUser)
+		if currentUser is not None:
+			currentUser.activateUser()
+			db.session.commit()
+			currentAction.GUIDActionRun()
+			db.session.commit()
+
+	#Put the code here that will look up the regGUID. 
+	#If the regGUID is found then activate the user and delete the GUID from the DB. Then display success message and link to login.
+	#If the regGUID isn't found or is not linked to a user display appropriate registration error.
+	return render_template('activation.html')
+
+
+@application.route('/user/passwordReset/<string:passGUID>/')
+@loginStatus
+def accountPassReset(passGUID):
+	#Put the code here that will look up the regGUID. 
+	#If the regGUID is found then activate the user and delete the GUID from the DB. Then display success message and link to login.
+	#If the regGUID isn't found or is not linked to a user display appropriate registration error.
+	return render_template('passwordReset.html')
+
+
 
 # ============================================================================
 
@@ -585,11 +627,13 @@ def updateEntryStatus(entry, judgement):
 				float(competitors)) >= float(competition.judgeMinApprovePercentage):
 			msg(str("Entry: (" + str(entry.id) + ") is being Approved using the % Crowd Sourcing Method"))
 			entry.entryStatus[0].approveEntry()
+			mail_send_entryApproved()
 			return entry
 		# Check if Entry had Met the Required Player % to Reject
 		elif (float(sqlA_GET_Entry_FUNC_Count_FILT_Rejections(entry.id)) / float(competitors)) >= float(competition.judgeMinRejectPercentage):
 			msg(str("Entry: (" + str(entry.id) + ") is being Rejected using the % Crowd Sourcing Method"))
 			entry.entryStatus[0].rejectEntry()
+			mail_send_entryRejected()
 			return entry
 		else:
 			entry.entryStatus[0].progressEntry()
@@ -599,10 +643,12 @@ def updateEntryStatus(entry, judgement):
 		if (judgement == 1):
 			msg(str("Entry: (" + str(entry.id) + ") is being Approved using the Admin Method"))
 			entry.entryStatus[0].approveEntry()
+			mail_send_entryApproved()
 			return entry
 		else:
 			msg(str("Entry: (" + str(entry.id) + ") is being Rejected using the Admin Method"))
 			entry.entryStatus[0].rejectEntry()
+			mail_send_entryRejected()
 			return entry
 	# Vote Based Approval
 	elif (competition.judgementType == 3):
@@ -610,11 +656,13 @@ def updateEntryStatus(entry, judgement):
 		if (float(sqlA_GET_Entry_FUNC_Count_FILT_Approvals(entry.id)) >= float(competition.judgeMinApproveVotes)):
 			msg(str("Entry: (" + str(entry.id) + ") is being Approved using the Voting Method"))
 			entry.entryStatus[0].approveEntry()
+			mail_send_entryApproved()
 			return entry
 		# Check if Entry had Met the Required Player Votes to Reject
 		elif (float(sqlA_GET_Entry_FUNC_Count_FILT_Rejections(entry.id)) >= float(competition.judgeMinRejectVotes)):
 			msg(str("Entry: (" + str(entry.id) + ") is being Rejected using the Voting Method"))
 			entry.entryStatus[0].rejectEntry()
+			mail_send_entryRejected()
 			return entry
 		else:
 			entry.entryStatus[0].progressEntry()
@@ -845,10 +893,14 @@ class User(db.Model):
 		self.lastName = lastName
 		self.email = email
 		self.password = password
-		self.sysActive = 1
+		self.sysActive = 0
 		# Additional
 		self.totalEntries = 0
 		self.totalJudgements = 0
+
+	def activateUser(self):
+		self.sysActive = 1
+		return
 
 	def updateLastLogin(self):
 		self.lastLogin = datetime.now()
@@ -857,6 +909,38 @@ class User(db.Model):
 	def updateLastLogout(self):
 		self.lastLogout = datetime.now()
 		return
+
+class GUIDActions(db.Model):
+	__tablename__ = 'GUIDActions'
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	GUID = db.Column(db.String(100))
+	actionCode = db.Column(db.Integer)
+	objectID = db.Column(db.Integer) #Holds UserID or Entry ID
+	active_from = db.Column(db.DateTime)
+	active_to = db.Column(db.DateTime)
+	actionCompleted = db.Column(db.DateTime)
+	sysActive = db.Column(db.Integer)
+	sysCreated = db.Column(db.DateTime, default=datetime.now)
+	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+	def __init__(self, GUID, actionCode, objectID):
+		# Required
+		self.GUID = GUID
+		self.actionCode = actionCode
+		self.objectID = objectID
+		self.activate_from = datetime.now()
+		msg(str(self.activate_from))
+		self.activate_to = self.activate_from + timedelta(days=2)
+		msg(str(self.activate_to))
+		self.sysActive = 1
+
+	def GUIDActionRun(self):
+		# Set Entry Status to "In Progress"
+		self.sysActive = 0
+		self.actionCompleted = datetime.now()
+		return
+
+
 
 
 class EntryApprovals(db.Model):
@@ -1005,9 +1089,6 @@ class Entry(db.Model):
 		self.S3imgSmallURL=imgSmallURL
 		self.S3imgThumbURL=imgThumbURL
 
-		msg(imgOrgURL)
-		msg(imgSmallURL)
-		msg(imgThumbURL)
 
 
 
@@ -1058,12 +1139,14 @@ class StatusType(db.Model):
 # === SQL Alchemy  - Create Methods
 # =======================================
 
+
+
 def sqlA_ADD_Users(userName, firstName, lastName, email, password):
 	newUser = User(userName, firstName, lastName, email, password)
 	db.session.add(newUser)
 	db.session.commit()
 	msg("User Creation is Completed")
-	return
+	return newUser
 
 
 def sqlA_ADD_Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL):
@@ -1109,6 +1192,14 @@ def sqlA_GET_Users():
 	return
 
 
+def sqlA_GET_User_FILT_id_inactive(in_id):
+	# Return Users.
+	# Filter:
+	#	ID
+	#	SysActive = 1
+	results = User.query.filter(and_(User.id == in_id, User.sysActive == 0)).first()
+	return results
+
 def sqlA_GET_User_FILT_id(in_id):
 	# Return Users.
 	# Filter:
@@ -1134,6 +1225,24 @@ def sqlA_GET_User_FILT_Email(in_email):
 	#	SysActive = 1
 	results = User.query.filter(and_(User.email == in_email, User.sysActive == 1)).first()
 	return results
+
+
+# SQL - GET - GUID 
+# =======================================
+
+def sqlA_GET_GUIDRequest(GUID, ID):
+	#results = GUIDActions.query.filter(and_(GUIDActions.GUID == GUID, GUIDActions.sysActive == 1, GUIDActions.active_from <= datetime.now(), GUIDActions.active_to >= datetime.now())).first()
+	results = GUIDActions.query.filter(and_(GUIDActions.GUID == GUID, GUIDActions.sysActive == 1)).first()
+	return results
+
+def sqlA_ADD_GUIDRequest(GUID, actionCode, objectID):
+
+	newGUID = GUIDActions(GUID, actionCode, objectID)
+	db.session.add(newGUID)
+	db.session.commit()
+	return 
+	
+
 
 # SQL - GET - Categories
 # =======================================
@@ -1483,10 +1592,50 @@ def sqlA_GET_User_Statistics_FILT_User_CompID(in_userID, in_competitionID):
 # ============================================================================
 # MAIL FUNCTIONS
 # ============================================================================
+def mail_checkUserPreferences(preference):
+	return True
 
-def mail_send_UserRegistration():
-	mail_send_TestEmail()
+def mail_send_UserRegistration(in_User, GUID):
+
+	if mail_checkUserPreferences("registration"):
+
+		actGUID = GUID
+		userName = in_User.userName
+		firstName = in_User.firstName
+
+		mailSubject = "Welcome to The Hunt"
+		mailSender = "webmaster@photoscavhunt.com"
+		mailRecipent = ["timbohiatt@gmail.com"]
+		msgHTML = render_template('/mail/mail_UserRegistration.html', in_confirmEmailLink=(application.config["HTTP_ROOT"]+"/register/activation/"+actGUID+"/"), in_username=userName, in_firstName=firstName)
+		mail_send(mailSubject, mailSender, mailRecipent, msgHTML)
+		return
+
 	return
+
+
+def mail_send_entryApproved():
+
+	if mail_checkUserPreferences("entryApproved"):
+		return
+
+	return
+
+def mail_send_entryRejected():
+
+	if mail_checkUserPreferences("entryRejected"):
+		return
+
+	return
+
+
+def mail_send(in_subject, in_sender, in_recipients, in_msgHTML):
+
+	messageObject = Message(subject=in_subject,sender=in_sender,recipients=in_recipients)
+	messageObject.html = in_msgHTML
+	mail.send(messageObject)
+
+	return
+
 
 
 def mail_send_TestEmail():
