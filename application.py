@@ -93,6 +93,10 @@ def loginStatus(f):
 	return wrap
 
 
+@application.errorhandler(404)
+def page_not_found(e):
+	return render_template('home.html', headerEntry=sqlA_GET_Entries_RND()), 404
+
 # ==ROUTES=====================================================================
 # View Site Index Page.
 @application.route('/')
@@ -303,10 +307,16 @@ def login():
 	return render_template('login.html', headerEntry=sqlA_GET_Entries_RND())
 
 
+
+
 @application.route('/register/activation/<string:regGUID>/')
+@application.route('/register/activation/')
 def accountActivate(regGUID):
-	msg("Running")
-	msg(regGUID)
+
+	expired = None
+	notFound = None
+	activated = None
+
 	currentAction = sqlA_GET_GUIDRequest(regGUID, 1) #1 = User Activation
 	msg(currentAction)
 	if currentAction is not None:
@@ -319,11 +329,18 @@ def accountActivate(regGUID):
 			db.session.commit()
 			currentAction.GUIDActionRun()
 			db.session.commit()
+			activated = True
+		else:
+			expired = True
+
+	else:
+		expired = True
+
 
 	#Put the code here that will look up the regGUID. 
 	#If the regGUID is found then activate the user and delete the GUID from the DB. Then display success message and link to login.
 	#If the regGUID isn't found or is not linked to a user display appropriate registration error.
-	return render_template('activation.html')
+	return render_template('activation.html', expired=expired, notFound=notFound, activated=activated)
 
 
 @application.route('/user/passwordReset/<string:passGUID>/')
@@ -1605,7 +1622,8 @@ def mail_send_UserRegistration(in_User, GUID):
 
 		mailSubject = "Welcome to The Hunt"
 		mailSender = "webmaster@photoscavhunt.com"
-		mailRecipent = ["timbohiatt@gmail.com"]
+
+		mailRecipent = [in_User.email]
 		msgHTML = render_template('/mail/mail_UserRegistration.html', in_confirmEmailLink=(application.config["HTTP_ROOT"]+"/register/activation/"+actGUID+"/"), in_username=userName, in_firstName=firstName)
 		mail_send(mailSubject, mailSender, mailRecipent, msgHTML)
 		return
@@ -1635,16 +1653,6 @@ def mail_send(in_subject, in_sender, in_recipients, in_msgHTML):
 	mail.send(messageObject)
 
 	return
-
-
-
-def mail_send_TestEmail():
-	msg("Sending Test Message")
-	mail_msg = Message("Hello World",sender=("Photo Scavenger Hunt", "webmaster@photoscavhunt.com"),recipients=["timbohiatt@gmail.com"])
-	mail_msg.subject ="Welcome to the Hunt"
-	mail.send(mail_msg)
-	return
-
 
 
 
