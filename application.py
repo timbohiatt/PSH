@@ -123,7 +123,12 @@ def contact():
 @loginStatus
 def scorecard():
 	scorecard = listScorecard()
-	return render_template('scorecard.html', scorecard=scorecard, headerEntry=sqlA_GET_Entries_RND())
+	listScores = None
+	if (len(scorecard['users'])>3):
+		listScores = True
+	else:
+		listScores = False
+	return render_template('scorecard.html', listScores=listScores, scorecard=scorecard, headerEntry=sqlA_GET_Entries_RND())
 
 # Listing all Entries
 

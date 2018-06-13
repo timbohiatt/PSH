@@ -2,6 +2,8 @@
 
 {% block body %}
 	<div style="padding-top: 90px;"></div>
+	{% if listScores %}
+
 	<section>
 		<div class="container">
 			<div class="card-deck-wrapper">
@@ -64,41 +66,33 @@
 			</table>
 		</div>	
 	</section>
-	<!--<table class="pre-scrollable" style="width:80%">
-		<tr>
-			<td></td>
-			<td></td>
-			{% for header in scorecard.headers %}
-			<td>{{header}}</td>
-			{% endfor %}
-		</tr>
-		{% for user in scorecard.users %}
-		<tr>
-			<td><div class="blog-author-img"><img src="static/media/MPSH_userProfiles/{{user.userName}}.jpg" alt=""></div></td>
-			<td>Username: {{user.userName}}</td>
-			{% for entry in user.entries %}
-				<td>{{entry.score}}</td>
-			{% endfor %}
-			<td>Total Score: {{user.totalScore}}</td>
-		</tr>
-		{% endfor %}
-	</table>-->
+
+	{% else %}
+
+	<header  id="about" class="masthead text-center text-white d-flex" style="background-image:url('/static/media/MPSH_entries/stage/{{headerEntry.imgFileName}}')">
+      <div class="container my-auto">
+        <div class="row">
+          <div class="col-lg-10 mx-auto">
+            <h1 class="text-uppercase">
+              <strong>Its too soon!</strong>
+            </h1>
+            <center><hr></center>
+          </div>
+          <div class="col-lg-8 mx-auto">
+            <p class="text-faded mb-5">Currently we don't have enough data to generate the scorecard for you.</u></p>
+            <p class="text-faded mb-5">We are waiting for more entires to be approved or for more players to join.</u></p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+	{% endif %}
+
+
 
 {% endblock%}
 
 		
-		<!--<div class="col-md-3">
-			
-		        
-	  		</div>
-	  	</div>
-		<div class="col-md-3">
-			{{score.firstName}}  {{score.lastName}} ({{score.userName}})
-		</div>
-		<div class="col-md-3">
-			{{score.userScore}}
-		</div>-->
-	
 	
 
 
