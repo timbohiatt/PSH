@@ -72,14 +72,14 @@ images = UploadSet('images', IMAGES)
 
 
 
-# ==WRAPPERS===================================================================
-@application.before_request
-def before_request():
-	if (application.config['RunEnv'] is not "local"):
-		if request.url.startswith('http://'):
-			url = request.url.replace('http://', 'https://', 1)
-			code = 301
-			return redirect(url, code=code)
+## ==WRAPPERS===================================================================
+#@application.before_request
+#def before_request():
+#	if (application.config['RunEnv'] is not "local"):
+#		if request.url.startswith('http://'):
+#			url = request.url.replace('http://', 'https://', 1)
+#			code = 301
+#			return redirect(url, code=code)
 
 
 def loginStatus(f):
