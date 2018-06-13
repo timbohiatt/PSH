@@ -298,9 +298,11 @@ def login():
 			session['userID'] = currentUser.id
 			session['competitionID'] = 1
 			# Update the Users Last Login Timestamp.
+			msg("Updating User Login!")
 			currentUser.updateLastLogin()
 			db.session.commit()
 			flash('You are  now logged in!', 'success')
+			msg("User Logged In!")
 			return redirect(url_for('profile',userID=session['userID']))
 		else:
 			# Ther User Exists but the Password Supplied was inccorect.
@@ -315,7 +317,6 @@ def login():
 
 
 @application.route('/register/activation/<string:regGUID>/')
-@application.route('/register/activation/')
 def accountActivate(regGUID):
 
 	expired = None
@@ -845,27 +846,27 @@ def get_api_v1_photoUpload():
 @application.route('/api/v1.0/existingUserCheck', methods=['POST'])
 def get_api_v1_existingUserCheck():
 	json_obj = json.loads(request.data)
-	logAPI(request.url_rule, "START", json_obj)
+	#logAPI(request.url_rule, "START", json_obj)
 	item = register_CheckExistingUsername(json_obj['userName'])
 	if item == True:
-		logAPI(request.url_rule, "END", json_obj)
+		#logAPI(request.url_rule, "END", json_obj)
 		return "False"
 	else:
-		logAPI(request.url_rule, "END", json_obj)
+		#logAPI(request.url_rule, "END", json_obj)
 		return "True"
 
 
 @application.route('/api/v1.0/existingEmailCheck', methods=['POST'])
 def get_api_v1_existingEmailCheck():
 	json_obj = json.loads(request.data)
-	logAPI(request.url_rule, "START", json_obj)
+	#logAPI(request.url_rule, "START", json_obj)
 
 	item = register_CheckExistingEmailAddress(json_obj['email'])
 	if item == True:
-		logAPI(request.url_rule, "END", json_obj)
+		#logAPI(request.url_rule, "END", json_obj)
 		return "False"
 	else:
-		logAPI(request.url_rule, "END", json_obj)
+		#logAPI(request.url_rule, "END", json_obj)
 		return "True"
 
 
