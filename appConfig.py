@@ -6,7 +6,7 @@ class Config:
 
 	APP_NAME = 'PSH'
 
-	HTTP_ROOT = os.environ['HTTP_ROOT']
+	HTTP_ROOT = os.environ['HTTP_CORE']
 
 	IMG_STAGE_DIR = 'static/media/MPSH_entries/stage/' 
 	IMG_FINAL_DIR = 'static/media/MPSH_entries/final/'

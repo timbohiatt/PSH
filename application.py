@@ -1624,7 +1624,7 @@ def mail_send_UserRegistration(in_User, GUID):
 		mailSender = "webmaster@photoscavhunt.com"
 
 		mailRecipent = [in_User.email]
-		msgHTML = render_template('/mail/mail_UserRegistration.html', in_confirmEmailLink=(application.config["HTTP_ROOT"]+"/register/activation/"+actGUID+"/"), in_username=userName, in_firstName=firstName)
+		msgHTML = render_template('/mail/mail_UserRegistration.html', in_confirmEmailLink=(application.config["HTTP_CORE"]+"/register/activation/"+actGUID+"/"), in_username=userName, in_firstName=firstName)
 		mail_send(mailSubject, mailSender, mailRecipent, msgHTML)
 		return
 
