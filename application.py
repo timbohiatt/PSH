@@ -90,7 +90,7 @@ def loginStatus(f):
 			return f(*args, **kwargs)
 		else:
 			flash("Please login to access content!", 'danger')
-			return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"]))
+			return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 	return wrap
 
  
@@ -177,7 +177,7 @@ def register():
 
 		flash('User Sign up is Completed! Please Login.', 'success')
 		msg("Redirecting to login page after user registration.")
-		return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"]))
+		return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 	return render_template('register.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
@@ -238,7 +238,7 @@ def submitEntry():
 			form.entryTitle.data), str(form.entryDescription.data), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL)
 
 		flash('Photo Entry is Completed! Good Luck!', 'success')
-		return redirect(url_for('index', _scheme=application.config["REDIRECT_PARAM"]))
+		return redirect(url_for('index', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 	return render_template('submit.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
@@ -267,7 +267,7 @@ def logout():
 	session.clear()
 	#flash('You are now logged out!', 'success')
 	msg("Redirecting to login page after user logout.")
-	return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"]))
+	return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 
 @application.route('/login', methods=['POST', 'GET'])
@@ -302,7 +302,7 @@ def login():
 			db.session.commit()
 			flash('You are  now logged in!', 'success')
 			msg("Redirecting to profile page after user login.")
-			return redirect(url_for('profile',userID=session['userID'], _scheme=application.config["REDIRECT_PARAM"]))
+			return redirect(url_for('profile',userID=session['userID'], _scheme=application.config["REDIRECT_PARAM"], _external=True))
 		else:
 			# Ther User Exists but the Password Supplied was inccorect.
 			msg("Loggin Failed for username " + request.form['username'])
