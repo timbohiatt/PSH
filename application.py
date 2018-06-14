@@ -495,40 +495,54 @@ def processEntry(imgPath, filename, UUID):
 	client = vision.ImageAnnotatorClient()
 	# The name of the image file to annotate
 	file_name = str(imgPath)
-	# Loads the image into memory
-	with io.open(file_name, 'rb') as image_file:
-		content = image_file.read()
 
-	image = types.Image(content=content)
-	# Performs label detection on the uploaded image
-	response = client.label_detection(image=image)
 	response_json = {}
 	response_json["UUID"] = UUID
 	response_json["TMPFileName"] = filename
-	vision_objects = {}
-	# where your children list will go
-	vision_children = []
 
-	# Build the List of Vision Label Objects
-	vision_children_labels = []
-	for label in response.label_annotations:
-		vision_label_item = {}
-		vision_label_item["Description"] = label.description.title()
-		vision_label_item["Score_Raw"] = label.score
-		vision_label_item["Score_Dec"] = (round(Decimal(vision_label_item["Score_Raw"]), 2) * 100)
-		vision_label_item["Topicality"] = label.topicality
-		vision_label_item["Mid"] = label.mid
-		if (float(vision_label_item["Score_Raw"]) >= application.config['GOOGLE_VISION_MIN_LABEL_SCORE']):
-			vision_label_item["Upload_Display"] = "True"
-		else:
-			vision_label_item["Upload_Display"] = "False"
-		vision_children_labels.append(vision_label_item)
-	vision_objects["labels"] = vision_children_labels
-	vision_children.append(vision_objects)
-	response_json["Vision"] = vision_children
-	#print json.dumps(response_json, sort_keys=True, indent=4, separators=(',', ': '))
+	# Loads the image into memory
+	with io.open(file_name, 'rb') as image_file:
+		content = image_file.read()
+	image = types.Image(content=content)
+	
+
+	googleVision = run_googleVision(image)
+	response_json["Vision"] = googleVision
 
 	return response_json
+
+
+def run_googleVision(image):
+
+	vision_objects = {}
+	vision_children = []
+
+	if(application.config["RUN_GOOGLEVISION"] == True):
+		# Performs label detection on the uploaded image
+		response = client.label_detection(image=image)
+		# Build the List of Vision Label Objects
+		vision_children_labels = []
+		for label in response.label_annotations:
+			vision_label_item = {}
+			vision_label_item["Description"] = label.description.title()
+			vision_label_item["Score_Raw"] = label.score
+			vision_label_item["Score_Dec"] = (round(Decimal(vision_label_item["Score_Raw"]), 2) * 100)
+			vision_label_item["Topicality"] = label.topicality
+			vision_label_item["Mid"] = label.mid
+			if (float(vision_label_item["Score_Raw"]) >= application.config['GOOGLE_VISION_MIN_LABEL_SCORE']):
+				vision_label_item["Upload_Display"] = "True"
+			else:
+				vision_label_item["Upload_Display"] = "False"
+			vision_children_labels.append(vision_label_item)
+		
+
+		vision_objects["labels"] = vision_children_labels
+		vision_children.append(vision_objects)
+
+	return vision_children
+
+
+
 
 
 def listScorecard():
@@ -1612,7 +1626,7 @@ def mail_send_UserRegistration(in_User, GUID):
 
 		mailSubject = "Welcome to The Hunt"
 		mailSender = "webmaster@photoscavhunt.com"
-		
+
 		mailRecipent = [in_User.email, "iguvfk3vrs@pomail.net"]
 		msgHTML = render_template('/mail/mail_UserRegistration.html', in_confirmEmailLink=(application.config["HTTP_CORE"]+"/register/activation/"+actGUID+"/"), in_username=userName, in_firstName=firstName)
 		mail_send(mailSubject, mailSender, mailRecipent, msgHTML)

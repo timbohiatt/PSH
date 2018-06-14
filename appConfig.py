@@ -24,6 +24,12 @@ class Config:
 	PUSHOVER_USERKEY = os.environ['PUSHOVER_USERKEY']
 	PUSHOVER_API = os.environ['PUSHOVER_API']
 
+
+	#Photo Analysis Functions
+	RUN_GOOGLEVISION = os.environ['RUN_GOOGLEVISION']
+
+
+
 	#GOOGLE_APPLICATION_CREDENTIALS = "secure/googleCreds.json"	
 
 	GOOGLE_VISION_MIN_LABEL_SCORE = 0.60 
