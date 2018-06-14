@@ -516,12 +516,12 @@ def run_googleVision(image):
 
 	vision_objects = {}
 	vision_children = []
+	vision_children_labels = []
 
 	if(application.config["RUN_GOOGLEVISION"] == True):
 		# Performs label detection on the uploaded image
 		response = client.label_detection(image=image)
 		# Build the List of Vision Label Objects
-		vision_children_labels = []
 		for label in response.label_annotations:
 			vision_label_item = {}
 			vision_label_item["Description"] = label.description.title()
@@ -536,8 +536,8 @@ def run_googleVision(image):
 			vision_children_labels.append(vision_label_item)
 		
 
-		vision_objects["labels"] = vision_children_labels
-		vision_children.append(vision_objects)
+	vision_objects["labels"] = vision_children_labels
+	vision_children.append(vision_objects)
 
 	return vision_children
 
