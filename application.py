@@ -164,20 +164,18 @@ def entry(entryID):
 # Registering a New User
 @application.route('/register', methods=['GET', 'POST'])
 def register():
-	msg("HEY===== WE MADE IT HERE =====>>>>>>")
 	form = form_userRegistation(request.form)
 	if request.method == 'POST' and form.validate():
-		msg(str("Registering User: " + str(form.userName.data)))
+		msg(str("Registering: " + str(form.userName.data)))
 		newUser = sqlA_ADD_Users(form.userName.data, form.firstName.data, form.lastName.data,
 					   form.email.data, sha256_crypt.encrypt(str(form.password.data)))
-		msg(str("User " + str(form.userName.data)) + " Added.")
+		msg(str("User Data: " + str(newUser)))
 		GUID = newUUID = uuid.uuid4().hex
 
 		sqlA_ADD_GUIDRequest(GUID, 1, newUser.id) # 1 = Activate User
 		mail_send_UserRegistration(newUser, GUID)
 
 		flash('User Sign up is Completed! Please Login.', 'success')
-		msg("Redirecting to login page after user registration.")
 		return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 	return render_template('register.html', form=form, headerEntry=sqlA_GET_Entries_RND())
@@ -260,14 +258,14 @@ def profile(userID):
 @loginStatus
 def logout():
 
-	msg("User " + session['userName'] + " Logging Out!")
+	#msg("User " + session['userName'] + " Logging Out!")
 	# Get The User Object
 	currentUser = sqlA_GET_User_FILT_id(session['userID'])
 	currentUser.updateLastLogout()
 	db.session.commit()
 	session.clear()
 	#flash('You are now logged out!', 'success')
-	msg("Redirecting to login page after user logout.")
+	#msg("Redirecting to login page after user logout.")
 	return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 
@@ -276,7 +274,7 @@ def login():
 	if request.method == 'POST':
 
 		# Get Login Form Details
-		msg("User attempting to login as User: " + request.form['username'])
+		#msg("User attempting to login as User: " + request.form['username'])
 		# Attempt Login with Username
 		currentUser = sqlA_GET_User_FILT_Username(request.form['username'])
 		if currentUser is None:
@@ -285,7 +283,7 @@ def login():
 			# Check if
 			if currentUser is None:
 				# Neither Email or Username Exists. Login Fails
-				msg("Login Failed for username " + request.form['username'])
+				#msg("Login Failed for username " + request.form['username'])
 				error = "Invalid Login."
 				return render_template('login.html', error=error, headerEntry=sqlA_GET_Entries_RND())
 
@@ -298,15 +296,15 @@ def login():
 			session['userID'] = currentUser.id
 			session['competitionID'] = 1
 			# Update the Users Last Login Timestamp.
-			msg(str("Upading last Login Time for user: "+str(session['userName'])+ "."))
+			#msg(str("Upading last Login Time for user: "+str(session['userName'])+ "."))
 			currentUser.updateLastLogin()
 			db.session.commit()
 			flash('You are  now logged in!', 'success')
-			msg("Redirecting to profile page after user login.")
+			#msg("Redirecting to profile page after user login.")
 			return redirect(url_for('profile',userID=session['userID'], _scheme=application.config["REDIRECT_PARAM"], _external=True))
 		else:
 			# Ther User Exists but the Password Supplied was inccorect.
-			msg("Loggin Failed for username " + request.form['username'])
+			#msg("Loggin Failed for username " + request.form['username'])
 			error = "Invalid Login."
 			return render_template('login.html', error=error, headerEntry=sqlA_GET_Entries_RND())
 
@@ -324,12 +322,8 @@ def accountActivate(regGUID):
 	activated = None
 
 	currentAction = sqlA_GET_GUIDRequest(regGUID, 1) #1 = User Activation
-	msg(currentAction)
 	if currentAction is not None:
-		msg("Going to process the GUID Action")
-		msg(currentAction.objectID)
 		currentUser = sqlA_GET_User_FILT_id_inactive(currentAction.objectID)
-		msg(currentUser)
 		if currentUser is not None:
 			currentUser.activateUser()
 			db.session.commit()
@@ -524,7 +518,6 @@ def processEntry(imgPath, filename, UUID):
 		vision_label_item["Score_Dec"] = (round(Decimal(vision_label_item["Score_Raw"]), 2) * 100)
 		vision_label_item["Topicality"] = label.topicality
 		vision_label_item["Mid"] = label.mid
-		msg(str("label - " + vision_label_item["Description"]))
 		if (float(vision_label_item["Score_Raw"]) >= application.config['GOOGLE_VISION_MIN_LABEL_SCORE']):
 			vision_label_item["Upload_Display"] = "True"
 		else:
@@ -533,7 +526,6 @@ def processEntry(imgPath, filename, UUID):
 	vision_objects["labels"] = vision_children_labels
 	vision_children.append(vision_objects)
 	response_json["Vision"] = vision_children
-	msg(str(response_json))
 	#print json.dumps(response_json, sort_keys=True, indent=4, separators=(',', ': '))
 
 	return response_json
@@ -715,7 +707,6 @@ def boto3Client(service):
 @application.route('/api/v1.0/judge/getEntry', methods=['POST'])
 def get_api_v1_judgeGetEntry():
 
-	msg("Getting a New Entry")
 	results = {}
 	# Execute a Select for the Next Entry that needs Judging.
 	# Select should return oldest Submitted with least votes.
@@ -797,7 +788,6 @@ def get_api_v1_entryApprove():
 		judgment = 1
 	else:
 		judgment = -1
-	msg(request.form["msg"])
 	sqlA_ADD_Approval(request.form["entryID"], session["userID"], judgment, request.form["msg"])
 
 	# AJAX Request from Client to Approve a Single Entry.
@@ -847,31 +837,20 @@ def get_api_v1_photoUpload():
 @application.route('/api/v1.0/existingUserCheck', methods=['POST'])
 def get_api_v1_existingUserCheck():
 	json_obj = json.loads(request.data)
-	#logAPI(request.url_rule, "START", json_obj)
 	item = register_CheckExistingUsername(json_obj['userName'])
 	if item == True:
-		print(str("Username: "+str(json_obj['userName'])+" Exists: True"))
-		#logAPI(request.url_rule, "END", json_obj)
 		return "False"
 	else:
-		#logAPI(request.url_rule, "END", json_obj)
-		print(str("Username: "+str(json_obj['userName'])+" Exists: False"))
 		return "True"
 
 
 @application.route('/api/v1.0/existingEmailCheck', methods=['POST'])
 def get_api_v1_existingEmailCheck():
 	json_obj = json.loads(request.data)
-	#logAPI(request.url_rule, "START", json_obj)
-
 	item = register_CheckExistingEmailAddress(json_obj['email'])
 	if item == True:
-		#logAPI(request.url_rule, "END", json_obj)
-		print(str("Email: "+str(json_obj['email'])+" Exists: True"))
 		return "False"
 	else:
-		#logAPI(request.url_rule, "END", json_obj)
-		print(str("Email: "+str(json_obj['email'])+" Exists: False"))
 		return "True"
 
 
