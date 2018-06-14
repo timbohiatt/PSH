@@ -1661,7 +1661,7 @@ def mail_send(in_subject, in_sender, in_recipients, in_msgHTML):
 
 
 def pushover_send(in_msg):
-	if(application.config["PUSHOVER_ENABLED"] is True):
+	if(application.config["PUSHOVER_ENABLED"] == 'True'):
 		client = Client(application.config["PUSHOVER_USERKEY"], api_token=application.config["PUSHOVER_API"])
 		client.send_message(str(in_msg), title=("PSH Message - "+str(application.config["RunEnv"])))
 

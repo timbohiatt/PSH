@@ -5,8 +5,8 @@ class Config:
 
 
 	APP_NAME = 'PSH'
-	
-	PUSHOVER_ENABLED = False
+
+	PUSHOVER_ENABLED = 'False'
 
 	HTTP_CORE = os.environ['HTTP_CORE'] 
 
@@ -50,7 +50,7 @@ class Config:
 
 class LocalConfig(Config):
 	DEBUG = True
-	PUSHOVER_ENABLED = True
+	PUSHOVER_ENABLED = 'True'
 	SECRET_KEY = 'MP$H_2019_prd'
 
 	MYSQL_HOST = 'localhost'
