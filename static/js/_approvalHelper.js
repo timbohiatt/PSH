@@ -41,13 +41,15 @@ $('#judge-rejectConfirm').click(function() {
 });
 
 $('#judge-rejectCancel').click(function() {
+    resetControls()
+});
+
+function resetControls(){
     $("#rejectionControls").css("display", "none");
     $("#judgementControls").css("display", "block");
     $('#judge-rejectConfirm').prop('disabled', true)
     $('#judge-reject-comment').val("")
-});
-
-
+}
 
 
 function initItem(data){
@@ -128,10 +130,12 @@ function processApproval(judgment) {
             },
             type: 'POST',
             success: function(response) {
+                resetControls()
                 loadNextJudgment();
             },
             error: function(error) {
                 console.log(error);
+                resetControls()
                 loadNextJudgment();
             }
         }); 
