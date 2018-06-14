@@ -164,6 +164,7 @@ def entry(entryID):
 # Registering a New User
 @application.route('/register', methods=['GET', 'POST'])
 def register():
+	msg("HEY===== WE MADE IT HERE =====>>>>>>")
 	form = form_userRegistation(request.form)
 	if request.method == 'POST' and form.validate():
 		msg(str("Registering User: " + str(form.userName.data)))
@@ -849,10 +850,12 @@ def get_api_v1_existingUserCheck():
 	#logAPI(request.url_rule, "START", json_obj)
 	item = register_CheckExistingUsername(json_obj['userName'])
 	if item == True:
+		print(str("Username: "+str(json_obj['userName'])+" Exists: True"))
 		#logAPI(request.url_rule, "END", json_obj)
 		return "False"
 	else:
 		#logAPI(request.url_rule, "END", json_obj)
+		print(str("Username: "+str(json_obj['userName'])+" Exists: False"))
 		return "True"
 
 
@@ -864,9 +867,11 @@ def get_api_v1_existingEmailCheck():
 	item = register_CheckExistingEmailAddress(json_obj['email'])
 	if item == True:
 		#logAPI(request.url_rule, "END", json_obj)
+		print(str("Email: "+str(json_obj['email'])+" Exists: True"))
 		return "False"
 	else:
 		#logAPI(request.url_rule, "END", json_obj)
+		print(str("Email: "+str(json_obj['email'])+" Exists: False"))
 		return "True"
 
 
