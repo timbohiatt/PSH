@@ -90,9 +90,10 @@ def loginStatus(f):
 			return f(*args, **kwargs)
 		else:
 			flash("Please login to access content!", 'danger')
-			return redirect(url_for('login'))
+			return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"]))
 	return wrap
 
+ 
 
 @application.errorhandler(404)
 def page_not_found(e):
@@ -176,7 +177,7 @@ def register():
 
 		flash('User Sign up is Completed! Please Login.', 'success')
 		msg("Redirecting to login page after user registration.")
-		return redirect(url_for('login'))
+		return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"]))
 
 	return render_template('register.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
@@ -237,7 +238,7 @@ def submitEntry():
 			form.entryTitle.data), str(form.entryDescription.data), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL)
 
 		flash('Photo Entry is Completed! Good Luck!', 'success')
-		return redirect(url_for('index'))
+		return redirect(url_for('index', _scheme=application.config["REDIRECT_PARAM"]))
 
 	return render_template('submit.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
@@ -266,7 +267,7 @@ def logout():
 	session.clear()
 	#flash('You are now logged out!', 'success')
 	msg("Redirecting to login page after user logout.")
-	return redirect(url_for('login'))
+	return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"]))
 
 
 @application.route('/login', methods=['POST', 'GET'])
@@ -301,7 +302,7 @@ def login():
 			db.session.commit()
 			flash('You are  now logged in!', 'success')
 			msg("Redirecting to profile page after user login.")
-			return redirect(url_for('profile',userID=session['userID']))
+			return redirect(url_for('profile',userID=session['userID'], _scheme=application.config["REDIRECT_PARAM"]))
 		else:
 			# Ther User Exists but the Password Supplied was inccorect.
 			msg("Loggin Failed for username " + request.form['username'])
@@ -1664,6 +1665,8 @@ def pushover_send(in_msg):
 	if(application.config["PUSHOVER_ENABLED"] == 'True'):
 		client = Client(application.config["PUSHOVER_USERKEY"], api_token=application.config["PUSHOVER_API"])
 		client.send_message(str(in_msg), title=("PSH Message - "+str(application.config["RunEnv"])))
+
+
 
 
 # ============================================================================

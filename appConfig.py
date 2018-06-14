@@ -9,6 +9,7 @@ class Config:
 	PUSHOVER_ENABLED = 'False'
 
 	HTTP_CORE = os.environ['HTTP_CORE'] 
+	REDIRECT_PARAM = "HTTP"
 
 	IMG_STAGE_DIR = 'static/media/MPSH_entries/stage/' 
 	IMG_FINAL_DIR = 'static/media/MPSH_entries/final/'
@@ -75,6 +76,7 @@ class LocalConfig(Config):
 
 class DevelopmentConfig(Config):
 	DEBUG = True
+	REDIRECT_PARAM = os.environ['REDIRECT_PARAM']
 
 	IMG_STAGE_DIR = '/opt/python/current/app/static/media/MPSH_entries/stage/'
 	IMG_FINAL_DIR = '/opt/python/current/app/static/media/MPSH_entries/final/'
@@ -102,6 +104,8 @@ class TestConfig(Config):
 	DEBUG = True
 	TESTING = True
 
+	REDIRECT_PARAM = os.environ['REDIRECT_PARAM']
+
 	SECRET_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
@@ -123,6 +127,8 @@ class TestConfig(Config):
 
 class ProductionConfig(Config):
 	DEBUG = False
+
+	REDIRECT_PARAM = os.environ['REDIRECT_PARAM']
 
 	SECRET_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
