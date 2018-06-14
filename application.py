@@ -7,6 +7,7 @@ import random
 from PIL import Image
 import boto3
 import watchtower, logging, logging.config
+from pushover import init, Client
 from datetime import datetime, timedelta
 from decimal import Decimal
 # Flask Imports
@@ -101,7 +102,6 @@ def page_not_found(e):
 # View Site Index Page.
 @application.route('/')
 def index():
-
 	return render_template('home.html', headerEntry=sqlA_GET_Entries_RND())
 
 # View the About Page
@@ -165,20 +165,17 @@ def entry(entryID):
 def register():
 	form = form_userRegistation(request.form)
 	if request.method == 'POST' and form.validate():
-		msg("Made it here again")
+		msg(str("Registering User: " + str(form.userName.data)))
 		newUser = sqlA_ADD_Users(form.userName.data, form.firstName.data, form.lastName.data,
 					   form.email.data, sha256_crypt.encrypt(str(form.password.data)))
-		
+		msg(str("User " + str(form.userName.data)) + " Added.")
 		GUID = newUUID = uuid.uuid4().hex
-		msg("=====$&##O&)#)#*")
-		msg(newUser.id)
-		msg(GUID)
-		msg("=====$&##O&)#)#*")
 
 		sqlA_ADD_GUIDRequest(GUID, 1, newUser.id) # 1 = Activate User
 		mail_send_UserRegistration(newUser, GUID)
 
 		flash('User Sign up is Completed! Please Login.', 'success')
+		msg("Redirecting to login page after user registration.")
 		return redirect(url_for('login'))
 
 	return render_template('register.html', form=form, headerEntry=sqlA_GET_Entries_RND())
@@ -268,6 +265,7 @@ def logout():
 	db.session.commit()
 	session.clear()
 	#flash('You are now logged out!', 'success')
+	msg("Redirecting to login page after user logout.")
 	return redirect(url_for('login'))
 
 
@@ -298,11 +296,11 @@ def login():
 			session['userID'] = currentUser.id
 			session['competitionID'] = 1
 			# Update the Users Last Login Timestamp.
-			msg("Updating User Login!")
+			msg(str("Upading last Login Time for user: "+str(session['userName'])+ "."))
 			currentUser.updateLastLogin()
 			db.session.commit()
 			flash('You are  now logged in!', 'success')
-			msg("User Logged In!")
+			msg("Redirecting to profile page after user login.")
 			return redirect(url_for('profile',userID=session['userID']))
 		else:
 			# Ther User Exists but the Password Supplied was inccorect.
@@ -697,6 +695,7 @@ def updateEntryStatus(entry, judgement):
 
 def msg(in_msg):
 	application.logger.info(in_msg)
+	pushover_send(in_msg)
 
 
 def awsSession():
@@ -1168,7 +1167,7 @@ def sqlA_ADD_Users(userName, firstName, lastName, email, password):
 	newUser = User(userName, firstName, lastName, email, password)
 	db.session.add(newUser)
 	db.session.commit()
-	msg("User Creation is Completed")
+	msg(str("User " + str(userName) + " Created & Commited. User Data: " + str(newUser)))
 	return newUser
 
 
@@ -1661,6 +1660,11 @@ def mail_send(in_subject, in_sender, in_recipients, in_msgHTML):
 	return
 
 
+def pushover_send(in_msg):
+	if(application.config["PUSHOVER_ENABLED"] is True):
+		client = Client(application.config["PUSHOVER_USERKEY"], api_token=application.config["PUSHOVER_API"])
+		client.send_message(str(in_msg), title=("PSH Message - "+str(application.config["RunEnv"])))
+
 
 # ============================================================================
 # ============================================================================
@@ -1668,8 +1672,8 @@ def mail_send(in_subject, in_sender, in_recipients, in_msgHTML):
 
 if __name__ == '__main__':
 
-	msg("Connecting to MYSQL HOST: " + str(application.config["MYSQL_HOST"]))
-	msg("Connecting to DB URI : "+ str(application.config["SQLALCHEMY_DATABASE_URI"]))
+	#msg("Connecting to MYSQL HOST: " + str(application.config["MYSQL_HOST"]))
+	#msg("Connecting to DB URI : "+ str(application.config["SQLALCHEMY_DATABASE_URI"]))
 
 
 	#application.secret_key = 'MP$H_2019_prd'

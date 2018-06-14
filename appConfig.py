@@ -5,6 +5,8 @@ class Config:
 
 
 	APP_NAME = 'PSH'
+	
+	PUSHOVER_ENABLED = False
 
 	HTTP_CORE = os.environ['HTTP_CORE'] 
 
@@ -16,6 +18,10 @@ class Config:
 	AWS_S3_ORGIMG = "static/media/MPSH_entries/Original"
 	AWS_S3_SMALLIMG = "static/media/MPSH_entries/Small"
 	AWS_S3_THUMBIMG = "static/media/MPSH_entries/Thumbnail"
+
+	#Pushover Notification Keys.
+	PUSHOVER_USERKEY = os.environ['PUSHOVER_USERKEY']
+	PUSHOVER_API = os.environ['PUSHOVER_API']
 
 	#GOOGLE_APPLICATION_CREDENTIALS = "secure/googleCreds.json"	
 
@@ -44,7 +50,7 @@ class Config:
 
 class LocalConfig(Config):
 	DEBUG = True
-
+	PUSHOVER_ENABLED = True
 	SECRET_KEY = 'MP$H_2019_prd'
 
 	MYSQL_HOST = 'localhost'
@@ -76,6 +82,7 @@ class DevelopmentConfig(Config):
 	SECRET_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
 	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
+	PUSHOVER_ENABLED = os.environ['PUSHOVER_ENABLED'] 
 
 	MYSQL_HOST = os.environ['MYSQL_HOST'] 
 	MYSQL_USER = os.environ['MYSQL_USER'] 
@@ -99,6 +106,7 @@ class TestConfig(Config):
 
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
 	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
+	PUSHOVER_ENABLED = os.environ['PUSHOVER_ENABLED'] 
 
 	MYSQL_HOST = os.environ['MYSQL_HOST'] 
 	MYSQL_USER = os.environ['MYSQL_USER'] 
@@ -120,6 +128,7 @@ class ProductionConfig(Config):
 
 	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID'] 
 	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY'] 
+	PUSHOVER_ENABLED = os.environ['PUSHOVER_ENABLED'] 
 
 	MYSQL_HOST = os.environ['MYSQL_HOST'] 
 	MYSQL_USER = os.environ['MYSQL_USER'] 
