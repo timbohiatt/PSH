@@ -654,13 +654,13 @@ def updateEntryStatus(entry, judgement):
 		# Check if Entry had Met the Required Player % to Approve
 		if (float(sqlA_GET_Entry_FUNC_Count_FILT_Approvals(entry.id)) /
 				float(competitors)) >= float(competition.judgeMinApprovePercentage):
-			msg(str("Entry: (" + str(entry.id) + ") is being Approved using the % Crowd Sourcing Method"))
+			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the % Crowd Sourcing Method"))
 			entry.entryStatus[0].approveEntry()
 			mail_send_entryApproved()
 			return entry
 		# Check if Entry had Met the Required Player % to Reject
 		elif (float(sqlA_GET_Entry_FUNC_Count_FILT_Rejections(entry.id)) / float(competitors)) >= float(competition.judgeMinRejectPercentage):
-			msg(str("Entry: (" + str(entry.id) + ") is being Rejected using the % Crowd Sourcing Method"))
+			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the % Crowd Sourcing Method"))
 			entry.entryStatus[0].rejectEntry()
 			mail_send_entryRejected()
 			return entry
@@ -670,12 +670,12 @@ def updateEntryStatus(entry, judgement):
 	# Admin Based Approval
 	elif (competition.judgementType == 2):
 		if (judgement == 1):
-			msg(str("Entry: (" + str(entry.id) + ") is being Approved using the Admin Method"))
+			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the Admin Method"))
 			entry.entryStatus[0].approveEntry()
 			mail_send_entryApproved()
 			return entry
 		else:
-			msg(str("Entry: (" + str(entry.id) + ") is being Rejected using the Admin Method"))
+			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the Admin Method"))
 			entry.entryStatus[0].rejectEntry()
 			mail_send_entryRejected()
 			return entry
@@ -683,13 +683,13 @@ def updateEntryStatus(entry, judgement):
 	elif (competition.judgementType == 3):
 		# Check if Entry had Met the Required Player Votesto Approve
 		if (float(sqlA_GET_Entry_FUNC_Count_FILT_Approvals(entry.id)) >= float(competition.judgeMinApproveVotes)):
-			msg(str("Entry: (" + str(entry.id) + ") is being Approved using the Voting Method"))
+			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the Voting Method"))
 			entry.entryStatus[0].approveEntry()
 			mail_send_entryApproved()
 			return entry
 		# Check if Entry had Met the Required Player Votes to Reject
 		elif (float(sqlA_GET_Entry_FUNC_Count_FILT_Rejections(entry.id)) >= float(competition.judgeMinRejectVotes)):
-			msg(str("Entry: (" + str(entry.id) + ") is being Rejected using the Voting Method"))
+			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the Voting Method"))
 			entry.entryStatus[0].rejectEntry()
 			mail_send_entryRejected()
 			return entry
