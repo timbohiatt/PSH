@@ -19,8 +19,6 @@
 		var entryLocation = {};
 		var categoryData = null;
 
-
-
 		$('#previous-step').click(function() {
 			transitionPreviousStep()
     	});

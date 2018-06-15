@@ -4,6 +4,24 @@
 
 {% block body %}
 		
+		{% if registered %}
+		<div id="registered" class="container-fluid">
+			<div class="row" id="pwd-container">
+				<div class="col"></div>
+				<div class="col-6">
+					<section>
+						<center>
+							<span class="h4 text-uppercase">Congratulations. Your account is now been created!</span><br>
+							<span class="h5 text-uppercase">You need to verify your email before you can play.</span>
+						</center>
+					</section>
+				</div>
+				<div class="col"></div>
+			</div>
+		</div>
+		{% endif %}
+	
+
 		{% if activated %}
 		<div id="activated" class="container-fluid">
 			<div class="row" id="pwd-container">

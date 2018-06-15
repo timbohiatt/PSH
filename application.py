@@ -176,7 +176,7 @@ def register():
 		mail_send_UserRegistration(newUser, GUID)
 
 		flash('User Sign up is Completed! Please Login.', 'success')
-		return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"], _external=True))
+		return redirect(url_for('accountPendingActivation', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 	return render_template('register.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
@@ -313,6 +313,10 @@ def login():
 
 
 
+@application.route('/register/pending/')
+def accountPendingActivation():
+	return render_template('activation.html', expired=False, notFound=False, activated=False, registered=True)
+
 
 @application.route('/register/activation/<string:regGUID>/')
 def accountActivate(regGUID):
@@ -340,7 +344,7 @@ def accountActivate(regGUID):
 	#Put the code here that will look up the regGUID. 
 	#If the regGUID is found then activate the user and delete the GUID from the DB. Then display success message and link to login.
 	#If the regGUID isn't found or is not linked to a user display appropriate registration error.
-	return render_template('activation.html', expired=expired, notFound=notFound, activated=activated)
+	return render_template('activation.html', expired=expired, notFound=notFound, activated=activated, registered=False)
 
 
 @application.route('/user/passwordReset/<string:passGUID>/')
@@ -1663,6 +1667,33 @@ def pushover_send(in_msg):
 	if(application.config["PUSHOVER_ENABLED"] == 'True'):
 		client = Client(application.config["PUSHOVER_USERKEY"], api_token=application.config["PUSHOVER_API"])
 		client.send_message(str(in_msg), title=("PSH Message - "+str(application.config["RunEnv"])))
+
+
+# ============================================================================
+# ============================================================================
+# MAIL FUNCTIONS
+# ============================================================================
+
+@application.route('/admin/dashboard/', methods=['POST'])
+def admin_manage_dashboard():
+	return
+
+@application.route('/admin/cateogries/edit', methods=['POST'])
+def admin_manage_categories():
+	return
+
+@application.route('/admin/users/edit', methods=['POST'])
+def admin_manage_users():
+	return
+
+
+@application.route('/admin/entries/edit', methods=['POST'])
+def admin_manage_entries():
+	return
+
+@application.route('/admin/competition/edit', methods=['POST'])
+def admin_manage_competitions():
+	return
 
 
 
