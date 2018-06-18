@@ -182,7 +182,7 @@ def register():
 
 
 
-# Registering a New User
+# Registering a New Entry
 @application.route('/submitEntry', methods=['GET', 'POST'])
 @loginStatus
 def submitEntry():
@@ -211,33 +211,33 @@ def submitEntry():
 	# Set the Categories for the Drop Down.
 	form.cateogryID.choices = categories
 
-	if request.method == 'POST':
-		# Will Submit Entry if POST and Validated Form.
-		target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
-		# If the file uploaded during Pre-Process rename the TMP file to final File.
-		if (os.path.isfile("".join([target, form.tmpFileName.data])) == True):
-			filename = (form.tmpFileName.data).replace('_tmp_', '', 1)
-			UUID = form.entryImageUUID.data
-			os.rename(("".join([target, form.tmpFileName.data])), ("".join([target, filename])))
+# 	if request.method == 'POST':
+# 		# Will Submit Entry if POST and Validated Form.
+# 		target = os.path.join(APP_ROOT, application.config['IMG_STAGE_DIR'])
+# 		# If the file uploaded during Pre-Process rename the TMP file to final File.
+# 		if (os.path.isfile("".join([target, form.tmpFileName.data])) == True):
+# 			filename = (form.tmpFileName.data).replace('_tmp_', '', 1)
+# 			UUID = form.entryImageUUID.data
+# 			os.rename(("".join([target, form.tmpFileName.data])), ("".join([target, filename])))
 
-		# No File was uploaded in the "Pre-Process" so it is being uploaded now.
-		# Google Vision Will be run over the file again.
-		else:
-			for file in request.files.getlist("entryImage"):
-				filename, UUID = image_fileNameGenerator(session['userName'], form.cateogryID.data, False)
-				imagePath = "".join([target, filename])
-				file.save(imagePath)
+# 		# No File was uploaded in the "Pre-Process" so it is being uploaded now.
+# 		# Google Vision Will be run over the file again.
+# 		else:
+# 			for file in request.files.getlist("entryImage"):
+# 				filename, UUID = image_fileNameGenerator(session['userName'], form.cateogryID.data, False)
+# 				imagePath = "".join([target, filename])
+# 				file.save(imagePath)
 
-				json.dumps(processEntry(imagePath, filename, UUID))
+# 				json.dumps(processEntry(imagePath, filename, UUID))
 
-		#### S3 File Move Logic HERE!
-		imgOrgURL,imgSmallURL, imgThumbURL = processAWSS3Save(imagePath, filename, UUID)
+# 		#### S3 File Move Logic HERE!
+# 		imgOrgURL,imgSmallURL, imgThumbURL = processAWSS3Save(imagePath, filename, UUID)
 
-		sqlA_ADD_Entry(session['userID'], session['competitionID'], form.cateogryID.data, str(
-			form.entryTitle.data), str(form.entryDescription.data), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL)
+# 		sqlA_ADD_Entry(session['userID'], session['competitionID'], form.cateogryID.data, str(
+# 			form.entryTitle.data), str(form.entryDescription.data), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL, latitude, longitude, placeID, placeName, placeAddress)
 
-		flash('Photo Entry is Completed! Good Luck!', 'success')
-		return redirect(url_for('index', _scheme=application.config["REDIRECT_PARAM"], _external=True))
+# 		flash('Photo Entry is Completed! Good Luck!', 'success')
+# 		return redirect(url_for('index', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 	return render_template('submit.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
@@ -258,14 +258,14 @@ def profile(userID):
 @loginStatus
 def logout():
 
-	#msg("User " + session['userName'] + " Logging Out!")
+	msg(str("User " + session['userName'] + " Logging Out!"))
 	# Get The User Object
 	currentUser = sqlA_GET_User_FILT_id(session['userID'])
 	currentUser.updateLastLogout()
 	db.session.commit()
 	session.clear()
 	#flash('You are now logged out!', 'success')
-	#msg("Redirecting to login page after user logout.")
+	msg("Redirecting to login page after user logout.")
 	return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 
@@ -274,7 +274,7 @@ def login():
 	if request.method == 'POST':
 
 		# Get Login Form Details
-		#msg("User attempting to login as User: " + request.form['username'])
+		msg(str("User attempting to login as User: " + request.form['username']))
 		# Attempt Login with Username
 		currentUser = sqlA_GET_User_FILT_Username(request.form['username'])
 		if currentUser is None:
@@ -283,7 +283,7 @@ def login():
 			# Check if
 			if currentUser is None:
 				# Neither Email or Username Exists. Login Fails
-				#msg("Login Failed for username " + request.form['username'])
+				msg(str("Login Failed for username " + request.form['username']))
 				error = "Invalid Login."
 				return render_template('login.html', error=error, headerEntry=sqlA_GET_Entries_RND())
 
@@ -296,15 +296,15 @@ def login():
 			session['userID'] = currentUser.id
 			session['competitionID'] = 1
 			# Update the Users Last Login Timestamp.
-			#msg(str("Upading last Login Time for user: "+str(session['userName'])+ "."))
+			msg(str("Upading last Login Time for user: "+str(session['userName'])+ "."))
 			currentUser.updateLastLogin()
 			db.session.commit()
 			flash('You are  now logged in!', 'success')
-			#msg("Redirecting to profile page after user login.")
+			msg("Redirecting to profile page after user login.")
 			return redirect(url_for('profile',userID=session['userID'], _scheme=application.config["REDIRECT_PARAM"], _external=True))
 		else:
 			# Ther User Exists but the Password Supplied was inccorect.
-			#msg("Loggin Failed for username " + request.form['username'])
+			msg(str("Loggin Failed for username " + request.form['username']))
 			error = "Invalid Login."
 			return render_template('login.html', error=error, headerEntry=sqlA_GET_Entries_RND())
 
@@ -780,8 +780,10 @@ def get_api_v1_entrySubmit():
 			#### S3 File Move Logic HERE!
 			imgOrgURL,imgSmallURL, imgThumbURL = processAWSS3Save(("".join([target, filename])), filename, UUID)
 
+			#Set Location Data
+
 			sqlA_ADD_Entry(session['userID'], session['competitionID'], data["categoryID"], str(
-				data["title"]), str(data["description"]), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL)
+				data["title"]), str(data["description"]), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL, data["entryLocation"])
 
 			tags = [] 
 			tags.append(session['userName'])
@@ -954,9 +956,7 @@ class GUIDActions(db.Model):
 		self.actionCode = actionCode
 		self.objectID = objectID
 		self.activate_from = datetime.now()
-		msg(str(self.activate_from))
 		self.activate_to = self.activate_from + timedelta(days=2)
-		msg(str(self.activate_to))
 		self.sysActive = 1
 
 	def GUIDActionRun(self):
@@ -1076,11 +1076,41 @@ class EntryTag(db.Model):
 	# ==[ Vitural Columns ]==
 
 
+class Location(db.Model):
+	__tablename__ = 'Locations'
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	entryID = db.Column(db.Integer, db.ForeignKey('Entries.id'))
+	competitionID = db.Column(db.Integer, db.ForeignKey('Competition.id'))
+	latitude = db.Column(db.String(45))
+	longitude = db.Column(db.String(45))
+	placeID = db.Column(db.String(100))
+	placeName = db.Column(db.String(500))
+	placeAddress = db.Column(db.String(500))
+	sysActive = db.Column(db.Integer)
+	sysCreated = db.Column(db.DateTime, default=datetime.now)
+	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+	# ==[ Vitural Columns ]==
+	entry = db.relationship('Entry', back_populates="location")
+
+	# ==[ User Object Methods ]==
+	def __init__(self, entryID, competitionID, latitude, longitude, placeID, placeName, placeAddress ):
+		# Required
+		self.entryID = entryID
+		self.competitionID = competitionID
+		self.latitude = latitude
+		self.longitude = longitude
+		self.placeID = placeID
+		self.placeName = placeName
+		self.placeAddress = placeAddress
+		self.sysActive = 1
+
+
 class Entry(db.Model):
 	__tablename__ = 'Entries'
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	userID = db.Column(db.Integer, db.ForeignKey('User.id'))
 	competitionID = db.Column(db.Integer, db.ForeignKey('Competition.id'))
+	#locationID = db.Column(db.Integer, db.ForeignKey('Location.id'))
 	categoryID = db.Column(db.Integer, db.ForeignKey('Categories.id'))
 	title = db.Column(db.String(150))
 	description = db.Column(db.String(4000))
@@ -1096,8 +1126,8 @@ class Entry(db.Model):
 	# ==[ Vitural Columns ]==
 	uploader = db.relationship("User", backref=db.backref("User", uselist=False))
 	category = db.relationship("Categories", backref=db.backref("category", uselist=False))
-
 	entryStatus = db.relationship("EntryStatus", backref='entry')
+	location  = db.relationship("Location", uselist=False, back_populates="entry")
 
 	# ==[ User Object Methods ]==
 	def __init__(self, userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL ):
@@ -1174,13 +1204,15 @@ def sqlA_ADD_Users(userName, firstName, lastName, email, password):
 	return newUser
 
 
-def sqlA_ADD_Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL):
+def sqlA_ADD_Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL, LocationData):
 
 	# Get Status Type
 	statusType = StatusType.query.filter(and_(StatusType.id == 1, StatusType.sysActive == 1)).first()
 	newEntry = Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL)
 	db.session.add(newEntry)
 	db.session.commit()
+	newLocationData = Location(newEntry.id, competitionID, LocationData["place-latitude"], LocationData["place-longitude"], LocationData["place-id"], LocationData["place-name"], LocationData["place-address"])
+	db.session.add(newLocationData)
 	newEntryStatus = EntryStatus(newEntry.id, statusType.id)
 	db.session.add(newEntryStatus)
 	db.session.commit()
@@ -1282,14 +1314,11 @@ def sqlA_GET_AllCategories_FILT_compID(in_competitionID):
 	return categories
 
 def sqlA_GET_AllCategories_FILT_compID_catID(in_competitionID,in_categoryID):
-	msg(in_competitionID)
-	msg(in_categoryID)
 	# Return Categories.
 	# Filter:
 	#	CompetitionID
 	#	SysActive = 1
 	categories = Categories.query.filter(and_(Categories.id == in_categoryID, Competition.id == in_competitionID, Categories.sysActive == 1)).first()
-	msg(categories)
 	return categories
 
 

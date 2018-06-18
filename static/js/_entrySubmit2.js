@@ -425,6 +425,8 @@ function initMap() {
             ].join(' ');
           }
 
+
+
           //infowindowContent.children['place-icon'].src = place.icon;
           setLocationData(place, address)
           //infowindowContent.children['place-name'].textContent = place.name;
@@ -506,6 +508,45 @@ function setLocationData(place, address){
           entryLocation["place-address"] = address;
           entryLocation["place-name"] = place.name;
           entryLocation["place-id"] = place.place_id;
+          if (typeof place.address_components[0] != 'undefined') {
+    			entryLocation["place-StreetNo"] = place.address_components[0].short_name;
+    	  }else{
+    	  		entryLocation["place-StreetNo"] = null;
+    	  }
+    	  if (typeof place.address_components[1] != 'undefined') {
+    			entryLocation["place-Route"] = place.address_components[1].short_name;
+    	  }else{
+    	  		entryLocation["place-Route"] = null;
+    	  }
+      	  if (typeof place.address_components[2] != 'undefined') {
+    			entryLocation["place-Locality"] = place.address_components[2].short_name;
+    	  }else{
+    	  		entryLocation["place-Locality"] = null;
+    	  }
+    	  if (typeof place.address_components[3] != 'undefined') {
+    			entryLocation["place-AdminArea1"] = place.address_components[3].short_name;
+    	  }else{
+    	  		entryLocation["place-AdminArea1"] = null;
+    	  }
+    	  if (typeof place.address_components[4] != 'undefined') {
+    			entryLocation["place-AdminArea2"] = place.address_components[4].short_name;
+    	  }else{
+    	  		entryLocation["place-AdminArea2"] = null;
+    	  }
+    	  if (typeof place.address_components[5] != 'undefined') {
+    			entryLocation["place-Country"] = place.address_components[5].short_name;
+    	  }else{
+    	  		entryLocation["place-Country"] = null;
+    	  }    	  
+    	  if (typeof place.address_components[6] != 'undefined') {
+    			entryLocation["place-PostCode"] = place.address_components[6].short_name;
+    	  }else{
+    	  		entryLocation["place-PostCode"] = null;
+    	  }
+          
+		  entryLocation["place-latitude"] = place.geometry.location.lat();
+          entryLocation["place-longitude"] = place.geometry.location.lng();
+
 
 
 }
