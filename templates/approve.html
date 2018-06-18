@@ -3,65 +3,107 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-		<div style="padding-top: 90px;"></div>
-
-		<h1>Scav Hunt Entries</h1>
-
-		<section>
-		  <div class="container" id="entryContainer" style="display:none;"">
-		    <div class="row">
-		      <div class="col-md-6">
-		      	<div class="card">
-		      		<div class="card-block">
-		      			<h4 class="card-title" id="judgmentTitle"></h4>
-		      		</div>
-		      	</div>
-		        <div class="card">
-		          <div class="card-block">
-		            <h4 class="card-title">Description:</h4>
-		            <div id="judgmentPointValue"></div>
-					<div id="judgmentCategory"></div>
-					<div id="judgmentEntryDT"></div>
-				<div id="judgmentEntryOverallStatus"></div>
-		            <p class="card-text" id="judgmentDescription"></p>
-		            <p class="card-text" id="judgmentPointValue"></p>
-		            <!--<a href="#" class="btn btn-primary">Read More</a>-->
-		          </div>
-		        </div>
-		      </div>
-		      <div class="col-md-6">
-		        <img class="card-img-bottom" id="judgmentImg">
-		      </div>
-		    </div>
-		  </div>
-		</section>
-
-
-		<div class="container" id="noEntryContainer" style="display:none;">
-		    <div class="row">
-		      <div class="col-md-6">
-		      	<div class="card">
-		      		<div class="card-block">
-		      			<h4 class="card-title">There are currently no entries to Judge. Check Back later!</h4>
-		      		</div>
-		      	</div>
-			  </div>
-		    </div>
-		  </div>
-		</section>
-
-
-
-
-		<div class="card" max-height="70%" id="judgmentControls" style="display:none;">
-			<div class="products">
+		
+		<div id="Processing" class="container-fluid" style="display:none;">
+			<div class="row">
+				<div class="col">
+					<section>
+						<img style="height:auto;width:100px;display:none;" id="uploadProcessing"/>
+					</section>
+				</div>
 			</div>
-		 	<div class="footer">
-		 		<a class="btn" id="prev" href="#" ripple="" ripple-color="#d3d3d3">Prev</a>
-		 		<a class="btn" href="javascript:processApproval(1);">Approve</a>
-		 		<a class="btn" href="javascript:processApproval(0);">Reject</a>
-		 		<a class="btn" id="next" href="#" ripple="" ripple-color="#d3d3d3">Next</a>
-		 	</div>
+		</div>
+
+		<div id="Entries" class="container-fluid" style="display:none;">
+			<div class="m-5"><br></div>
+
+			<div class="row">
+				<div class="col"></div>
+				<div class="col-6">
+				
+						<div class="row">
+							<span class="h4"><center>Entry Judging</center></span>
+						</div>
+						<div class="row">
+							Entry Judging is simple. Look at the photo. Look at the category. Read the category requirements. Should they meet the requirements. Vote to Approve. Should there be issues or questions. Vote to reject and provide feedback to the player so they know why you rejected their entry. Earn Kudos for approving and rejecting entries. Use kudos to add future entries to the competition.
+						</div>
+						<div class="row">
+							<br>
+							<br>
+						</div>
+						<div class="row">
+							<div class="col">
+								<img style="height:auto;width:100%;" id="judgmentImg"/>
+							</div>
+							<div class="col"> <!--style="background-color: green;">-->
+								<div class="judgement-Content">
+									
+										<span class="h4 text-uppercase" id="entry-catTitle"></span> (<span class="h6" id="entry-catValue"></span> points)
+										<br><br>
+										<span class="h6" id="category-detail-description-title">Photo Requirements:</span><br>
+										<span id="entry-catDescription"></span>
+								</div>
+							</div>
+						</div>
+						<div id="judgementControls" class="row m-5">
+							<div class="col">
+								<div class="span1">     
+	          						<p><input type="button" id="judge-approve" class="btn btn-sm btn-primary btn-block" value="Approve"></p>
+	          					</div>
+							</div>
+							<div class="col">
+								<div class="span1">
+	          						<p><input type="button" id="judge-reject" class="btn btn-sm btn-primary btn-block" value="Reject"></p>
+	          					</div>
+							</div>
+						</div>
+						<div id="rejectionControls" style="display:none;">
+							<div class="row m-5">
+								<div class="h5">Provide Rejection Feedback</div>
+									<br>Write a short, but detailed, comment explaining why you are rejecting this entry. Include details like: <br>
+										<ul>
+											<ul>
+										  		<li>What is missing from the entry.</li>
+										  		<li>What part of the criteria they missed or is not clear to you as a judge.</li>
+										  		<li>Which rules may be in breach by uploading this entry.</li>
+											</ul>
+										</ul>
+								<input type="text" class="form-control" id="judge-reject-comment" placeholder="Comment Here">
+								<span id="validation-text"></span>
+							</div>
+							<div class="row m-5">
+								<div class="col">
+									<div class="span1">     
+		          						<p><input type="button" id="judge-rejectConfirm" class="btn btn-sm btn-primary btn-block" value="Confirm Rejection"></p>
+		          					</div>
+								</div>
+								<div class="col">
+									<div class="span1">
+		          						<p><input type="button" id="judge-rejectCancel" class="btn btn-sm btn-primary btn-block" value="Cancel"></p>
+		          					</div>
+								</div>
+							</div>
+						</div>
+
+				</div>
+				<div class="col"></div>
+			</div>
+		</div>
+
+
+		<div id="noEntries" class="container-fluid" style="display:none;">
+			<div class="row" id="pwd-container">
+				<div class="col"></div>
+				<div class="col-6">
+					<section>
+						<center>
+							<span class="h4 text-uppercase">There are currently no entries to Judge.</span><br>
+							<span class="h5 text-uppercase">Check back later.</span>
+						</center>
+					</section>
+				</div>
+				<div class="col"></div>
+			</div>
 		</div>
 
 {% endblock%}

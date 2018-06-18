@@ -1,7 +1,7 @@
 #Exclude complied Pyhton Files
 *.pyc
 *.sh
-appConfig.py
+#appConfig.py
 
 #Exclude Docker File from being pushed to GIT.
 Dockerfile

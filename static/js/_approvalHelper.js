@@ -3,27 +3,67 @@ data_entryID = null;
 
 
 window.onload = function() {
-  loadNextJudgment()
+    $("#uploadProcessing").attr("src",("/static/img/processing.gif"))
+    $('#judge-rejectConfirm').prop('disabled', true);
+    loadNextJudgment()
 };
 
 
+$('#judge-reject-comment').keyup(function() {
+    if ($(this).val().length >= 40){ 
+        $("#validation-text").removeClass();
+        $("#validation-text").css({fontSize: 12});
+        $("#validation-text").addClass("text-success");
+        $('#validation-text').html("Your comment is a valid length.")
+        $('#judge-rejectConfirm').prop('disabled', false)
+    }
+    else{
+        $("#validation-text").removeClass();
+        $("#validation-text").css({fontSize: 12});
+        $("#validation-text").addClass("text-danger");
+        $('#validation-text').html("Your comment is to short.")
+        $('#judge-rejectConfirm').prop('disabled', true)
+    }
+});
+
+$('#judge-approve').click(function() {
+    processApproval(1)
+});
+
+$('#judge-reject').click(function() {
+    $("#judgementControls").css("display", "none");
+    $("#rejectionControls").css("display", "block");
+    //processApproval(0)
+});
+
+$('#judge-rejectConfirm').click(function() {
+    processApproval(0)
+});
+
+$('#judge-rejectCancel').click(function() {
+    resetControls()
+});
+
+function resetControls(){
+    $("#rejectionControls").css("display", "none");
+    $("#judgementControls").css("display", "block");
+    $('#judge-rejectConfirm').prop('disabled', true)
+    $('#judge-reject-comment').val("")
+}
+
+
 function initItem(data){
-    console.log(data.Entry)
-    document.getElementById('judgmentTitle').innerHTML=data.Entry.entryTitle;
-    document.getElementById('judgmentDescription').innerHTML=data.Entry.entryDescription;
-    //document.getElementById('judgmentPointValue').innerHTML=data.Entry.entryTitle;
-    //document.getElementById('judgmentCategory').innerHTML=data.Entry.entryTitle;
-    document.getElementById('judgmentEntryDT').innerHTML=data.Entry.entry_date;
-    document.getElementById('judgmentEntryOverallStatus').innerHTML=data.Entry.overallStatus;
     var preview = document.getElementById('judgmentImg');
-    preview.src = ("/static/media/MPSH_entries/stage/" + data.Entry.imgFileName);
-    //Set Global Entry ID.
+    preview.src = (data.Entry.smallURL);
     data_entryID = data.Entry.entryID;
    
 }
 
 
 function loadNextJudgment(){
+    $("#Entries").css("display", "none");
+    $("#Processing").css("display", "block");
+    $('#judge-reject-comment').val("")
 
     form_data = {}
 
@@ -39,37 +79,48 @@ function loadNextJudgment(){
         //success: function(data) {
             //When Entires Are Available to Judge 
             if (data.Entries == true){
-                $(function() {
-                    initItem(data)
-                }).promise().done(function(){
-                    $("#entryContainer").fadeIn("slow").promise().done(function(){
-                        setTimeout(function(){
-                            $("#judgmentControls").fadeIn("slow")
-                        }, 500);
-                    });
-                });   
+                if (data.Entry.smallURL != null) {
+                    $(function() {
+                        initItem(data)
+                    }).promise().done(function(){
+                        //data = JSON.parse(data)
+                        setupJudgment(data)
+                        $("#Processing").css("display", "none");
+                        $("#Entries").css("display", "block");
+                    });  
+                }
+                else{
+                    loadNextJudgment()
+                } 
             }
             //When There are no entries to Judge
             else{
-
-                $("#judgmentControls").fadeOut("slow").promise().done(function(){
-                    setTimeout(function(){
-                        $("#noEntryContainer").fadeIn("slow")
-                    }, 1000);
-                });
+                $("#Entries").css("display", "none");
+                $("#noEntries").css("display", "block");
             }
         })
         .fail(function(xhr) {
             console.log('error', xhr);
+            
         });
 
+}
+
+function setupJudgment(data){
+    $("#entry-catTitle").html(data.Entry.categoryTitle);
+    $("#entry-catDescription").html(data.Entry.categoryDescription);
+    $("#entry-catValue").html(data.Entry.categoryValue);
+    
 }
 
 
 
 function processApproval(judgment) {
+    $("#Entries").css("display", "none");
+    $("#Processing").css("display", "block");
+    
 
-    var message = ""
+    var message = $('#judge-reject-comment').val()
     $.ajax({
             url: '/api/v1.0/entry/approve',
             data:{
@@ -79,22 +130,17 @@ function processApproval(judgment) {
             },
             type: 'POST',
             success: function(response) {
-                
-                $( "#judgmentControls").fadeOut("slow").promise().done(function(){
-                    $( "#entryContainer").fadeOut("slow").promise().done(function(){
-                        setTimeout(function(){
-                            loadNextJudgment();
-                        }, 1000);
-                    });
-               }); 
+                resetControls()
+                loadNextJudgment();
             },
             error: function(error) {
                 console.log(error);
-                //alert("Error: We could not reach the Server.");
+                resetControls()
                 loadNextJudgment();
             }
         }); 
 }
+
 
 
 
