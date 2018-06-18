@@ -937,6 +937,21 @@ class User(db.Model):
 		self.lastLogout = datetime.now()
 		return
 
+
+class SYSTexts(db.Model):
+	__tablename__ = 'sysTexts'
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	langKey = db.Column(db.String(3))
+	pageCode = db.Column(db.String(100))
+	pageTextID = db.Column(db.String(100))
+	pageTextOptionID = db.Column(db.Integer)
+	text = db.Column(db.String(4000))
+	sysActive = db.Column(db.Integer)
+	sysCreated = db.Column(db.DateTime, default=datetime.now)
+	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+
 class GUIDActions(db.Model):
 	__tablename__ = 'GUIDActions'
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
