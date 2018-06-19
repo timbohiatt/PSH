@@ -4,6 +4,7 @@ import io
 import sys
 import uuid
 import random
+import re
 from PIL import Image
 import boto3
 import watchtower, logging, logging.config
@@ -460,6 +461,17 @@ def processAWSS3Save(imagePath, filename, UUID):
 		return None, None, None
 
 
+def processTag(tag):
+	if tag is not None:
+		tag = tag.lower()
+		tag = tag.strip()
+		regex = re.compile('[^a-zA-Z0-9]')
+		tag = regex.sub('', tag)
+		return tag
+	else:
+		return None
+
+
 # Generate Photo File Name
 def image_fileNameGenerator(userID, category, tmpFlag):
 
@@ -780,13 +792,50 @@ def get_api_v1_entrySubmit():
 			#### S3 File Move Logic HERE!
 			imgOrgURL,imgSmallURL, imgThumbURL = processAWSS3Save(("".join([target, filename])), filename, UUID)
 
-			#Set Location Data
+			
+			#Clean and Process Tags
+			uploadedTags = data["uploadTags"]
+			cleanTags = []
+			for tag in uploadedTags:
+
+				cleanTags.append(processTag(tag))
+				#Remove Duplicate Tags
+				cleanTags = list(set(cleanTags))
+
+			#Handling Tags
+			tags = []
+			#Add Competition Tag
+			tag = {}
+			tag["text"] = processTag(sqlA_GET_Competition_Tag(session["competitionID"]))
+			tag["type"] = 1 #Competition Tag Type
+			if tag["text"] is not None:
+				tags.append(tag)
+				while tag["text"] in cleanTags: cleanTags.remove(tag["text"])
+			#Add Category Tags
+			tag = {}
+			tag["text"] = processTag(sqlA_GET_Category_Tag(data["categoryID"], session["competitionID"]))
+			tag["type"] = 2 #Category Tag Type
+			if tag["text"] is not None:
+				tags.append(tag)
+				while tag["text"] in cleanTags: cleanTags.remove(tag["text"])		
+			#Add Username Tag
+			tag = {}
+			tag["text"] = processTag(session["userName"])
+			tag["type"] = 3 #Username Tag Type
+			if tag["text"] is not None:
+				tags.append(tag)
+				while tag["text"] in cleanTags: cleanTags.remove(tag["text"])
+			#Add Custom Tags
+			for item in cleanTags:
+				tag = {}
+				tag["text"] = processTag(item)
+				tag["type"] = 4 #User Generated
+				tags.append(tag)
+
 
 			sqlA_ADD_Entry(session['userID'], session['competitionID'], data["categoryID"], str(
-				data["title"]), str(data["description"]), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL, data["entryLocation"])
+				data["title"]), str(data["description"]), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL, data["entryLocation"], tags)
 
-			tags = [] 
-			tags.append(session['userName'])
 
 			for item in data["imageLabels"]:
 				tags.append(item)
@@ -797,6 +846,9 @@ def get_api_v1_entrySubmit():
 	
 
 	return jsonify({'statusCode': statusCode, 'status': status, 'statusLongText': statusLongText})
+
+
+
 
 
 
@@ -1014,6 +1066,7 @@ class Categories(db.Model):
 	# tagID
 	title = db.Column(db.String(250))
 	description = db.Column(db.String(4000))
+	tagText = db.Column(db.String(250))
 	value = db.Column(db.Integer)
 	active_from = db.Column(db.DateTime)
 	active_to = db.Column(db.DateTime)
@@ -1040,6 +1093,7 @@ class Competition(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	title = db.Column(db.String(150))
 	description = db.Column(db.String(250))
+	tagText = db.Column(db.String(250))
 	judgementType = db.Column(db.Integer, db.ForeignKey('JudgementType.id'))
 	judgeMinApprovePercentage = db.Column(db.Float)
 	judgeMinRejectPercentage = db.Column(db.Float)
@@ -1060,13 +1114,29 @@ class Competition(db.Model):
 class Tags(db.Model):
 	__tablename__ = 'Tags'
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-	tagTitle = db.Column(db.String(250))
+	competitionID = db.Column(db.Integer, db.ForeignKey('Competition.id'))
+	tagText = db.Column(db.String(250))
 	tagType = db.Column(db.Integer, db.ForeignKey('TagType.id'))
+	tagCount = db.Column(db.Integer, default=1)
 	sysActive = db.Column(db.Integer)
 	sysCreated = db.Column(db.DateTime, default=datetime.now)
 	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 	# ==[ Vitural Columns ]==
 	entry = db.relationship("EntryTag")
+
+
+	def __init__(self, competitionID, tagText, tagType ):
+		# Required
+		self.competitionID = competitionID
+		self.tagText = tagText
+		self.tagType = tagType
+		self.sysActive = 1
+
+	def tagUpdate(self):
+		# Set Entry Status to "In Progress"
+		self.tagCount = (self.tagCount + 1)
+		return
+
 
 
 class TagType(db.Model):
@@ -1080,15 +1150,24 @@ class TagType(db.Model):
 	tag = db.relationship("Tags")
 
 
+
 class EntryTag(db.Model):
 	__tablename__ = 'EntryTag'
 	id = db.Column(db.Integer, primary_key=True)
+	competitionID = db.Column(db.Integer, db.ForeignKey('Competition.id'))
 	entry = db.Column(db.Integer, db.ForeignKey('Entries.id'))
 	tag = db.Column(db.Integer, db.ForeignKey('Tags.id'))
 	sysActive = db.Column(db.Integer)
 	sysCreated = db.Column(db.DateTime, default=datetime.now)
 	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 	# ==[ Vitural Columns ]==
+
+	def __init__(self, competitionID, entryID, tagID):
+		# Required
+		self.competitionID = competitionID
+		self.entry = entryID
+		self.tag = tagID
+		self.sysActive = 1
 
 
 class Location(db.Model):
@@ -1219,7 +1298,7 @@ def sqlA_ADD_Users(userName, firstName, lastName, email, password):
 	return newUser
 
 
-def sqlA_ADD_Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL, LocationData):
+def sqlA_ADD_Entry(userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL, LocationData, tags):
 
 	# Get Status Type
 	statusType = StatusType.query.filter(and_(StatusType.id == 1, StatusType.sysActive == 1)).first()
@@ -1231,6 +1310,13 @@ def sqlA_ADD_Entry(userID, competitionID, cateogryID, title, description, imgUUI
 	newEntryStatus = EntryStatus(newEntry.id, statusType.id)
 	db.session.add(newEntryStatus)
 	db.session.commit()
+	
+	#Add/Update Entry Tags.
+	for tag in tags:
+		tagText = tag["text"] 
+		tagType = tag["type"]
+		sqlA_ADD_Tag(newEntry.id, userID, competitionID, tagText, tagType)
+
 	return
 
 
@@ -1316,6 +1402,10 @@ def sqlA_ADD_GUIDRequest(GUID, actionCode, objectID):
 	
 
 
+
+
+
+
 # SQL - GET - Categories
 # =======================================
 
@@ -1372,6 +1462,48 @@ def sqlA_GET_AvailableCategories_FILT_userID_compID(in_userID, in_competitionID)
 #	return results
 
 
+# SQL - GET - Tags
+# =======================================
+
+def sqlA_GET_Competition_Tag(competitionID):
+
+	competition = sqlA_GET_Competition_FILT_compID(competitionID)
+	if competition is not None:
+		return competition.tagText
+		
+	return None
+
+def sqlA_GET_Category_Tag(categoryID, competitionID):
+	category = sqlA_GET_AllCategories_FILT_compID_catID(competitionID,categoryID)
+	if category is not None:
+		return category.tagText
+
+	return None
+
+# SQL - ADD - Tags
+# =======================================
+
+def sqlA_ADD_Tag(entryID, userID, competitionID, tagText, tagType):
+
+	#search for the tag. If Existing for this competition it will be returned. (Search By TagType, Tagtext)
+	tagID = None
+	tag = Tags.query.filter(and_(Tags.sysActive == 1, Tags.competitionID==competitionID, Tags.tagText==tagText, Tags.tagType==tagType)).first()
+	
+	if tag is None:
+		newTag = Tags(competitionID, tagText, tagType)
+		db.session.add(newTag)
+		db.session.commit()
+		tagID = newTag.id
+	else:
+		tag.tagUpdate()
+		tagID = tag.id
+
+	newEntryTag = EntryTag(competitionID, entryID, tagID)
+	db.session.add(newEntryTag)
+	db.session.commit()
+
+
+
 # SQL - GET - Competition
 # =======================================
 
@@ -1422,8 +1554,6 @@ def sqlA_GET_Entries_RND():
 		row = None
 
 	return row
-
-
 
 
 def sqlA_GET_Entries_FILT_compID(in_competitionID):

@@ -209,7 +209,9 @@
 				$("#upload-preview").fadeOut("fast")
 				$(element).css("display", "None")
 				$("#step-p").css("display", "Block");
-				
+
+				uploadTags = []
+			
 				setTimeout(function(){
 					$(element).fadeOut("slow")
 					setTimeout(function(){
@@ -218,7 +220,7 @@
 						description = $("#formField_description").val()
 						catID = $("#form_CatSelect").val()
 						UUID = imageUUID
-						dataSet = {'title':title, 'description':description, 'categoryID':catID, 'UUID':UUID , 'tmpFileName':tmpFileName, 'imageLabels': imageLabels, 'entryLocation': entryLocation}
+						dataSet = {'title':title, 'description':description, 'categoryID':catID, 'UUID':UUID , 'tmpFileName':tmpFileName, 'imageLabels': imageLabels, 'entryLocation': entryLocation, 'uploadTags': uploadTags}
 						
 						$.ajax({
 							type: 'POST',
