@@ -157,9 +157,15 @@ def approveEntries():
 # View Entry By ID
 
 
-@application.route('/entry/<string:entryID>/')
+@application.route('/entries/entry/<string:entryID>/')
 def entry(entryID):
+	entries = sqlA_GET_Entries_FILT_compID_approved(session['competitionID'])
 	return render_template('entry.html', entryID=entryID, headerEntry=sqlA_GET_Entries_RND())
+
+@application.route('/entries/tags/<string:tag>/')
+def entriesTags(tag):
+	entries = sqlA_GET_Entries_FILT_compID_approved(session['competitionID'])
+	return render_template('entries.html', entries=entries, entriesAvailable=(len(entries) >= 1), headerEntry=sqlA_GET_Entries_RND())
 
 
 # Registering a New User
@@ -167,15 +173,14 @@ def entry(entryID):
 def register():
 	form = form_userRegistation(request.form)
 	if request.method == 'POST' and form.validate():
-		msg(str("Registering: " + str(form.userName.data)))
+
 		newUser = sqlA_ADD_Users(form.userName.data, form.firstName.data, form.lastName.data,
 					   form.email.data, sha256_crypt.encrypt(str(form.password.data)))
-		msg(str("User Data: " + str(newUser)))
 		GUID = newUUID = uuid.uuid4().hex
 
 		sqlA_ADD_GUIDRequest(GUID, 1, newUser.id) # 1 = Activate User
 		mail_send_UserRegistration(newUser, GUID)
-
+		msg(str("Registering: " + str(form.userName.data)))
 		flash('User Sign up is Completed! Please Login.', 'success')
 		return redirect(url_for('accountPendingActivation', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
@@ -266,7 +271,6 @@ def logout():
 	db.session.commit()
 	session.clear()
 	#flash('You are now logged out!', 'success')
-	msg("Redirecting to login page after user logout.")
 	return redirect(url_for('login', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 
@@ -297,15 +301,13 @@ def login():
 			session['userID'] = currentUser.id
 			session['competitionID'] = 1
 			# Update the Users Last Login Timestamp.
-			msg(str("Upading last Login Time for user: "+str(session['userName'])+ "."))
 			currentUser.updateLastLogin()
 			db.session.commit()
 			flash('You are  now logged in!', 'success')
-			msg("Redirecting to profile page after user login.")
 			return redirect(url_for('profile',userID=session['userID'], _scheme=application.config["REDIRECT_PARAM"], _external=True))
 		else:
 			# Ther User Exists but the Password Supplied was inccorect.
-			msg(str("Loggin Failed for username " + request.form['username']))
+			msg(str("Login Failed for username " + request.form['username']))
 			error = "Invalid Login."
 			return render_template('login.html', error=error, headerEntry=sqlA_GET_Entries_RND())
 
@@ -832,7 +834,6 @@ def get_api_v1_entrySubmit():
 				tag["type"] = 4 #User Generated
 				tags.append(tag)
 
-
 			sqlA_ADD_Entry(session['userID'], session['competitionID'], data["categoryID"], str(
 				data["title"]), str(data["description"]), str(UUID), str(filename), imgOrgURL,imgSmallURL, imgThumbURL, data["entryLocation"], tags)
 
@@ -843,6 +844,7 @@ def get_api_v1_entrySubmit():
 			statusCode = 200
 			status = "Upload Successful"
 			statusLongText = "Your Entry has been accepted and it pending the judges approval."
+			msg(str("User: " + str(session["userName"] + " added a New Entry.")))
 	
 
 	return jsonify({'statusCode': statusCode, 'status': status, 'statusLongText': statusLongText})
@@ -857,9 +859,11 @@ def get_api_v1_entrySubmit():
 def get_api_v1_entryApprove():
 
 	if (int(request.form["judgment"]) == 1):
+		msg(str("User: " + str(session["userName"] + " approved an entry.")))
 		judgment = 1
 	else:
 		judgment = -1
+		msg(str("User: " + str(session["userName"] + " rejected an entry.")))
 	sqlA_ADD_Approval(request.form["entryID"], session["userID"], judgment, request.form["msg"])
 
 	# AJAX Request from Client to Approve a Single Entry.
@@ -1122,7 +1126,8 @@ class Tags(db.Model):
 	sysCreated = db.Column(db.DateTime, default=datetime.now)
 	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 	# ==[ Vitural Columns ]==
-	entry = db.relationship("EntryTag")
+	entries  = db.relationship("EntryTag", uselist=True, back_populates="tagID")
+
 
 
 	def __init__(self, competitionID, tagText, tagType ):
@@ -1147,7 +1152,6 @@ class TagType(db.Model):
 	sysCreated = db.Column(db.DateTime, default=datetime.now)
 	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 	# ==[ Vitural Columns ]==
-	tag = db.relationship("Tags")
 
 
 
@@ -1161,6 +1165,11 @@ class EntryTag(db.Model):
 	sysCreated = db.Column(db.DateTime, default=datetime.now)
 	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 	# ==[ Vitural Columns ]==
+	entryID  = db.relationship("Entry", uselist=True, back_populates="tags")
+
+	tagID  = db.relationship("Tags", uselist=False,)# back_populates="entries")
+
+	#tags = db.relationship("Tags", back_populates="Entries")
 
 	def __init__(self, competitionID, entryID, tagID):
 		# Required
@@ -1169,6 +1178,48 @@ class EntryTag(db.Model):
 		self.tag = tagID
 		self.sysActive = 1
 
+
+class Entry(db.Model):
+	__tablename__ = 'Entries'
+	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	userID = db.Column(db.Integer, db.ForeignKey('User.id'))
+	competitionID = db.Column(db.Integer, db.ForeignKey('Competition.id'))
+	#locationID = db.Column(db.Integer, db.ForeignKey('Location.id'))
+	categoryID = db.Column(db.Integer, db.ForeignKey('Categories.id'))
+	title = db.Column(db.String(150))
+	description = db.Column(db.String(4000))
+	# statusID = db.Column(db.Integer, db.ForeignKey('User.id'))
+	imgUUID = db.Column(db.String(100))
+	imgFileName = db.Column(db.String(250))
+	sysActive = db.Column(db.Integer)
+	sysCreated = db.Column(db.DateTime, default=datetime.now)
+	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+	S3imgOrgURL = db.Column(db.String(4000))
+	S3imgSmallURL = db.Column(db.String(4000))
+	S3imgThumbURL = db.Column(db.String(4000))
+	# ==[ Vitural Columns ]==
+	uploader = db.relationship("User", backref=db.backref("User", uselist=False))
+	category = db.relationship("Categories", backref=db.backref("category", uselist=False))
+	entryStatus = db.relationship("EntryStatus", backref='entry')
+	location  = db.relationship("Location", uselist=False, back_populates="entry")
+
+	tags  = db.relationship("EntryTag", uselist=True, back_populates="entryID")
+
+
+	# ==[ User Object Methods ]==
+	def __init__(self, userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL):
+		# Required
+		self.userID = userID
+		self.competitionID = competitionID
+		self.categoryID = cateogryID
+		self.title = title
+		self.description = description
+		self.imgUUID = imgUUID
+		self.imgFileName = imgFileName
+		self.sysActive = 1
+		self.S3imgOrgURL=imgOrgURL
+		self.S3imgSmallURL=imgSmallURL
+		self.S3imgThumbURL=imgThumbURL
 
 class Location(db.Model):
 	__tablename__ = 'Locations'
@@ -1197,46 +1248,6 @@ class Location(db.Model):
 		self.placeName = placeName
 		self.placeAddress = placeAddress
 		self.sysActive = 1
-
-
-class Entry(db.Model):
-	__tablename__ = 'Entries'
-	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-	userID = db.Column(db.Integer, db.ForeignKey('User.id'))
-	competitionID = db.Column(db.Integer, db.ForeignKey('Competition.id'))
-	#locationID = db.Column(db.Integer, db.ForeignKey('Location.id'))
-	categoryID = db.Column(db.Integer, db.ForeignKey('Categories.id'))
-	title = db.Column(db.String(150))
-	description = db.Column(db.String(4000))
-	# statusID = db.Column(db.Integer, db.ForeignKey('User.id'))
-	imgUUID = db.Column(db.String(100))
-	imgFileName = db.Column(db.String(250))
-	sysActive = db.Column(db.Integer)
-	sysCreated = db.Column(db.DateTime, default=datetime.now)
-	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
-	S3imgOrgURL = db.Column(db.String(4000))
-	S3imgSmallURL = db.Column(db.String(4000))
-	S3imgThumbURL = db.Column(db.String(4000))
-	# ==[ Vitural Columns ]==
-	uploader = db.relationship("User", backref=db.backref("User", uselist=False))
-	category = db.relationship("Categories", backref=db.backref("category", uselist=False))
-	entryStatus = db.relationship("EntryStatus", backref='entry')
-	location  = db.relationship("Location", uselist=False, back_populates="entry")
-
-	# ==[ User Object Methods ]==
-	def __init__(self, userID, competitionID, cateogryID, title, description, imgUUID, imgFileName, imgOrgURL,imgSmallURL, imgThumbURL ):
-		# Required
-		self.userID = userID
-		self.competitionID = competitionID
-		self.categoryID = cateogryID
-		self.title = title
-		self.description = description
-		self.imgUUID = imgUUID
-		self.imgFileName = imgFileName
-		self.sysActive = 1
-		self.S3imgOrgURL=imgOrgURL
-		self.S3imgSmallURL=imgSmallURL
-		self.S3imgThumbURL=imgThumbURL
 
 
 
@@ -1294,7 +1305,6 @@ def sqlA_ADD_Users(userName, firstName, lastName, email, password):
 	newUser = User(userName, firstName, lastName, email, password)
 	db.session.add(newUser)
 	db.session.commit()
-	msg(str("User " + str(userName) + " Created & Commited. User Data: " + str(newUser)))
 	return newUser
 
 

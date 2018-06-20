@@ -66,7 +66,15 @@
 		     					<h1><a href="/entries/category/{{entry.category.id}}/">{{entry.category.title}}</a></h1>
 		    				</div>
 		    				<div class="blog-summary">
+		    					<p><h3>{{entry.title}}</h3></p>
 		     					<p>{{entry.description}}</p>
+		    				</div>
+		    				<div>
+		    					 <span>
+								    {% for tags in entry.tags %}
+								    	<a href="/entries/tags/{{tags.tagID.tagText}}">#{{tags.tagID.tagText}}</a>,
+								    {% endfor %}
+								</span>
 		    				</div>
 		    			</div>
 		    		</div>
