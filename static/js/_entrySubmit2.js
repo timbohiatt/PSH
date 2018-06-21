@@ -19,6 +19,8 @@
 		var entryLocation = {};
 		var categoryData = null;
 
+		populateCategories()
+
 		$('#previous-step').click(function() {
 			transitionPreviousStep()
     	});
@@ -67,6 +69,11 @@
 				$("#next-step").css("display", "None");
 				$("#upload-preview").css("display", "None");
 				$("#submit-step").css("display", "None");
+			}else if (currentStep == 2){
+				$("#previous-step").css("display", "Block");
+				$("#next-step").css("display", "None");
+				$("#upload-preview").css("display", "None");
+				$("#submit-step").css("display", "None");
 			}else if(currentStep == lastStep){
 				$("#previous-step").css("display", "Block");
 				$("#next-step").css("display", "None");
@@ -81,10 +88,7 @@
 		}
 
 		$("#form_CatSelect").change(function() {
-			$("#category-detail-description-title").css("display", "Block");
-			$("#category-detail-title").html(categoryData[($(this).prop('selectedIndex')-1)][4])
-			$("#category-detail-description").html(categoryData[($(this).prop('selectedIndex')-1)][2])
-		  	validateEntryData()
+			validateEntryData()
 		});
 		$("#formField_title").keyup(function() {
 		  	validateEntryData()
@@ -98,9 +102,20 @@
 		function validateEntryData(){
 			valid = false
 
-			if (currentStep == 2){
+			if (currentStep == 1){
 				if ($("#form_CatSelect option:selected").val() != 999){	
 					valid = true;
+					$("#category-detail-title").css("display", "Block");
+					$("#category-detail-description").css("display", "Block");
+					$("#category-detail-description-title").css("display", "Block");
+
+					$("#category-detail-title").html(categoryData[($("#form_CatSelect").prop('selectedIndex')-1)][4])
+					$("#category-detail-description").html(categoryData[($("#form_CatSelect").prop('selectedIndex')-1)][2])
+				}else{
+					valid = false;
+					$("#category-detail-title").css("display", "None");
+					$("#category-detail-description").css("display", "None");
+					$("#category-detail-description-title").css("display", "None");
 				}	
 			}else if (currentStep == 3){
 				if	($("#formField_title").val().length >= 8){
@@ -140,10 +155,11 @@
 				}
 			}else if (currentStep == 5){
 				valid = true;
-				
 			}else if (currentStep == 6){
 				valid = true;
-			}
+			}/*else if (currentStep == 2){
+				valid = true;
+			}*/
 
 			if (valid == true){
 				if (currentStep != lastStep){
@@ -326,7 +342,6 @@
 					imageUUID = data.UUID
 					tmpFileName = data.TMPFileName
 					populateLabels(data.Vision[0])
-					populateCategories()
 					transitionNextStep()
 					setupImagePreview(data.TMPFileName)
 				},
