@@ -3,7 +3,8 @@
   <head>
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>New User Registration</title>
+    <link rel=stylesheet type=text/css href="https://photoscavhunt.com/static/css/bootstrap_v2.min.css">
+    <title>Entry Rejected</title>
     <style>
     /* -------------------------------------
         RESPONSIVE AND MOBILE FRIENDLY STYLES
@@ -101,21 +102,58 @@
                       <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Hi there {{in_firstName}},</p>
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">We have a little bit of sad news for you. Your recent entry to the hunt has been rejected! But never fear there is still time to resolve the issues and submit another entry. </p>
-                        <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">
-                          <tbody>
-                            <tr>
-                              <td align="left" style="font-family: sans-serif; font-size: 14px; vertical-align: top; padding-bottom: 15px;">
-                                <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
-                                  <tbody>
-                                    <tr>
-                                      <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: #3498db; border-radius: 5px; text-align: center;"><center><a href="{{in_confirmEmailLink}}" target="_blank" style="display: inline-block; color: #ffffff; background-color: #3498db; border: solid 1px #3498db; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize; border-color: #3498db;">Confirm Email</a></center></td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr> d
-                          </tbody>
-                        </table>
+                        <p>However in the meantime the admin team have included the entry that has been rejected and some of the feedback from people who thought your entry didn't meet the requirments of The Hunt or the Category. We hope they are helpful for correcting your entry for future attempts at this category.</p>
+
+
+                        <div class="card">
+                          <img class="card-img-top" src="{{entry.S3imgSmallURL}}" alt="">
+                          <div class="card-body">
+                            <div class="row">
+                              <div class="col" align="center">
+                                <p class="h5">{{entry.title}}</p>
+                                <p class="h6">{{entry.description}}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <br>
+                        <div class="card">
+                          <div class="card-body">
+                            <div class="row" align="center">
+                              <div class="col">
+                                <p class="h4">Category Information</p>
+                              </div>
+                              
+                            </div>
+                            <div class="row">
+                              <div class="col" align="center">
+
+                                <p class="h6"><b>{{entry.category.title}}</b></p>
+                                <p class="h6">{{entry.category.description}}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <br>
+
+                        <div class="card">
+                            <div class="card-body">
+                              <div class="row mb-3" align="center">
+                                <div class="col">
+                                  <h4>FEEDBACK</h4>
+                                </div>
+                              </div>
+                            {% for rejection in rejections %} 
+                              <div class="row mb-4">
+                                <div class="col-2">
+                                  <img style="height: 30px; width:auto;" src="{{rejection.approver.S3ProfileImgSmallURL}}" alt="{{rejection.approver.userName}}">
+                                </div>
+                                <div class="col">{{rejection.comment}}</div>
+                              </div>
+                            {% endfor %}
+                           </div>                         
+                        </div>
+                        <br>
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Just remember should you choose to resubmit an entry you need to do it before the close of the next play window. You can reupload from the same category or you can choose a different category that you have not already completed.</p>
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Good luck with your next submission.</p>
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Scav Hunt Admin Team.</p>
@@ -133,7 +171,8 @@
               <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                 <tr>
                   <td class="content-block" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">
-                    <span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;">The Photo Scavenger Hunt is an Online Adventure Game for all.</span>
+                    <p><span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;">The Photo Scavenger Hunt is an Online Adventure Game for all.</span></p>
+                    <p><span class="apple-link" style="color: #999999; font-size: 10px; text-align: center;"><a href="https://photoscavhunt.com">START HUNTING</a></span></p>
                     <!--<br> Don't like these emails? <a href="{{in_unsubscribeLink}}" style="text-decoration: underline; color: #999999; font-size: 12px; text-align:center;">Unsubscribe</a>.-->
                   </td>
                 </tr>

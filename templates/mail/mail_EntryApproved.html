@@ -3,6 +3,7 @@
   <head>
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
     <title>New User Registration</title>
     <style>
     /* -------------------------------------
@@ -101,21 +102,19 @@
                       <td style="font-family: sans-serif; font-size: 14px; vertical-align: top;">
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Hi there {{in_firstName}},</p>
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Just a quick message to let you know that you entry has been approved! </p>
-                        <table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; box-sizing: border-box;">
-                          <tbody>
-                            <tr>
-                              <td align="left" style="font-family: sans-serif; font-size: 14px; vertical-align: top; padding-bottom: 15px;">
-                                <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
-                                  <tbody>
-                                    <tr>
-                                      <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; background-color: #3498db; border-radius: 5px; text-align: center;"><center><a href="{{in_confirmEmailLink}}" target="_blank" style="display: inline-block; color: #ffffff; background-color: #3498db; border: solid 1px #3498db; border-radius: 5px; box-sizing: border-box; cursor: pointer; text-decoration: none; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-transform: capitalize; border-color: #3498db;">Confirm Email</a></center></td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        <p>As a quick reminder we have included your entry below. Congrats again! You have earned yourself another <b>{{entry.category.value}} points</b> in the hunt.</p>
+                        <div class="card">
+                          <img class="card-img-top" src="{{entry.S3imgSmallURL}}" alt="">
+                          <div class="card-body">
+                            <div class="row">
+                              <div class="col" align="center">
+                                <p class="h4">{{entry.title}}</p>
+                                <p class="h5">{{entry.description}}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <br>
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Good luck! With your next entry. You can check the leaderboard any time you like by logging on the site.!</p>
                         <p style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; Margin-bottom: 15px;">Scav Hunt Admin Team.</p>
                       </td>
@@ -132,7 +131,8 @@
               <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;">
                 <tr>
                   <td class="content-block" style="font-family: sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; font-size: 12px; color: #999999; text-align: center;">
-                    <span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;">The Photo Scavenger Hunt is an Online Adventure Game for all.</span>
+                    <p><span class="apple-link" style="color: #999999; font-size: 12px; text-align: center;">The Photo Scavenger Hunt is an Online Adventure Game for all.</span></p>
+                    <p><span class="apple-link" style="color: #999999; font-size: 10px; text-align: center;"><a href="https://photoscavhunt.com">START HUNTING</a></span></p>
                     <!--<br> Don't like these emails? <a href="{{in_unsubscribeLink}}" style="text-decoration: underline; color: #999999; font-size: 12px; text-align:center;">Unsubscribe</a>.-->
                   </td>
                 </tr>

@@ -674,13 +674,13 @@ def updateEntryStatus(entry, judgement):
 				float(competitors)) >= float(competition.judgeMinApprovePercentage):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the % Crowd Sourcing Method"))
 			entry.entryStatus[0].approveEntry()
-			mail_send_entryApproved()
+			mail_send_entryApproved(entry.id)
 			return entry
 		# Check if Entry had Met the Required Player % to Reject
 		elif (float(sqlA_GET_Entry_FUNC_Count_FILT_Rejections(entry.id)) / float(competitors)) >= float(competition.judgeMinRejectPercentage):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the % Crowd Sourcing Method"))
 			entry.entryStatus[0].rejectEntry()
-			mail_send_entryRejected()
+			mail_send_entryRejected(entry.id)
 			return entry
 		else:
 			entry.entryStatus[0].progressEntry()
@@ -690,12 +690,12 @@ def updateEntryStatus(entry, judgement):
 		if (judgement == 1):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the Admin Method"))
 			entry.entryStatus[0].approveEntry()
-			mail_send_entryApproved()
+			mail_send_entryApproved(entry.id)
 			return entry
 		else:
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the Admin Method"))
 			entry.entryStatus[0].rejectEntry()
-			mail_send_entryRejected()
+			mail_send_entryRejected(entry.id)
 			return entry
 	# Vote Based Approval
 	elif (competition.judgementType == 3):
@@ -703,13 +703,13 @@ def updateEntryStatus(entry, judgement):
 		if (float(sqlA_GET_Entry_FUNC_Count_FILT_Approvals(entry.id)) >= float(competition.judgeMinApproveVotes)):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the Voting Method"))
 			entry.entryStatus[0].approveEntry()
-			mail_send_entryApproved()
+			mail_send_entryApproved(entry.id)
 			return entry
 		# Check if Entry had Met the Required Player Votes to Reject
 		elif (float(sqlA_GET_Entry_FUNC_Count_FILT_Rejections(entry.id)) >= float(competition.judgeMinRejectVotes)):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the Voting Method"))
 			entry.entryStatus[0].rejectEntry()
-			mail_send_entryRejected()
+			mail_send_entryRejected(entry.id)
 			return entry
 		else:
 			entry.entryStatus[0].progressEntry()
@@ -1052,6 +1052,7 @@ class EntryApprovals(db.Model):
 	sysCreated = db.Column(db.DateTime, default=datetime.now)
 	sysUpdated = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 	# ==[ Vitural Columns ]==
+	approver  = db.relationship("User", back_populates="approver")
 
 	# ==[ User Object Methods ]==
 	def __init__(self, entryID, approverID, approval, comment):
@@ -1574,6 +1575,15 @@ def sqlA_GET_Entries_FILT_compID(in_competitionID):
 	#
 	return Entry.query.filter(and_(Entry.competitionID == in_competitionID, Entry.sysActive == 1, )).all()
 
+def sqlA_GET_Entries_FILT_compID_entryID(in_competitionID, in_entryID):
+	# Return Entries.
+	# Filter:
+	#   CompetitionID
+	#   SysActive = 1
+	#
+	return Entry.query.filter(and_(Entry.competitionID == in_competitionID, Entry.id == in_entryID, Entry.sysActive == 1, )).first()
+
+
 
 def sqlA_GET_Entries_FILT_compID_approved_userID(in_competitionID, in_userID):
 	# Return Entries.
@@ -1735,6 +1745,22 @@ def sqlA_GET_Entry_FUNC_Count_FILT_Rejections(in_EntryID):
 	return db.session.execute(countRejections).scalar()
 
 
+
+def sqlA_GET_Rejections_FILT_entryID(in_EntryID):
+	# Return Count of Approvals for an Entry
+	# Filter:
+	#   EntryID
+	#   SysActive = 1
+	#   Aproval = -1
+
+	entryRejections = db.session.query(EntryApprovals).filter(
+		and_(
+			EntryApprovals.sysActive == 1,
+			EntryApprovals.approval == -1,
+			EntryApprovals.entry == in_EntryID))
+	return entryRejections
+
+
 def sqlA_GET_EntryApprovals_FUNC_Count_FILT_EntryID_UserID(in_EntryID, in_ApproverID):
 
 	entryApprovals = db.session.query(EntryApprovals).filter(
@@ -1815,7 +1841,7 @@ def mail_send_UserRegistration(in_User, GUID):
 		mailSubject = "Welcome to The Hunt"
 		mailSender = "webmaster@photoscavhunt.com"
 
-		mailRecipent = [in_User.email, "iguvfk3vrs@pomail.net"]
+		mailRecipent = [entry.uploader.email, "iguvfk3vrs@pomail.net"]
 		msgHTML = render_template('/mail/mail_UserRegistration.html', in_confirmEmailLink=(application.config["HTTP_CORE"]+"/register/activation/"+actGUID+"/"), in_username=userName, in_firstName=firstName)
 		mail_send(mailSubject, mailSender, mailRecipent, msgHTML)
 		return
@@ -1823,25 +1849,48 @@ def mail_send_UserRegistration(in_User, GUID):
 	return
 
 
-def mail_send_entryApproved():
+def mail_send_entryApproved(in_entryID):
 
 	if mail_checkUserPreferences("entryApproved"):
-		return
+		entry = sqlA_GET_Entries_FILT_compID_entryID(session["competitionID"], in_entryID)
+
+		userName = entry.uploader.userName
+		firstName = entry.uploader.firstName
+
+		mailSubject = str("Hey " + firstName + ", Your entry has been Approved.")
+		mailSender = "webmaster@photoscavhunt.com"
+
+		mailRecipent = [entry.uploader.email, "iguvfk3vrs@pomail.net"]
+		msgHTML = render_template('/mail/mail_entryApproved.html', entry=entry, in_username=userName, in_firstName=firstName)
+		mail_send(mailSubject, mailSender, mailRecipent, msgHTML)
 
 	return
 
-def mail_send_entryRejected():
+def mail_send_entryRejected(in_entryID):
 
 	if mail_checkUserPreferences("entryRejected"):
+
+		entry = sqlA_GET_Entries_FILT_compID_entryID(session["competitionID"], in_entryID)
+		rejections = sqlA_GET_Rejections_FILT_entryID(in_entryID)
+		
+		userName = entry.uploader.userName
+		firstName = entry.uploader.firstName
+
+		mailSubject = str("Hey " + firstName + ", Your entry has been Rejected.")
+		mailSender = "webmaster@photoscavhunt.com"
+
+		mailRecipent = [entry.uploader.email, "iguvfk3vrs@pomail.net"]
+		msgHTML = render_template('/mail/mail_entryRejected.html', entry=entry, rejections=rejections, in_username=userName, in_firstName=firstName)
+		mail_send(mailSubject, mailSender, mailRecipent, msgHTML)
 		return
 
 	return
 
 
 def mail_send(in_subject, in_sender, in_recipients, in_msgHTML):
-
 	messageObject = Message(subject=in_subject,sender=in_sender,recipients=in_recipients)
 	messageObject.html = in_msgHTML
+	print(messageObject)
 	mail.send(messageObject)
 
 	return
@@ -1855,7 +1904,7 @@ def pushover_send(in_msg):
 
 # ============================================================================
 # ============================================================================
-# MAIL FUNCTIONS
+# ADMIN FUNCTIONS
 # ============================================================================
 
 @application.route('/admin/dashboard/', methods=['POST'])
@@ -1879,6 +1928,29 @@ def admin_manage_entries():
 def admin_manage_competitions():
 	return
 
+
+@application.route('/mail/test/<string:type>/')
+def admin_mail_test(type):
+
+
+	if type == "reject":
+		in_entryID = 1
+		entry = sqlA_GET_Entries_FILT_compID_entryID(session["competitionID"], in_entryID)
+		rejections = sqlA_GET_Rejections_FILT_entryID(in_entryID)
+
+		userName = entry.uploader.userName
+		firstName = entry.uploader.firstName
+
+		return  render_template('/mail/mail_entryRejected.html', entry=entry, rejections=rejections, in_username=userName, in_firstName=firstName)
+	elif type == "approve":
+		in_entryID = 1
+		entry = sqlA_GET_Entries_FILT_compID_entryID(session["competitionID"], in_entryID)
+
+		userName = entry.uploader.userName
+		firstName = entry.uploader.firstName
+
+
+		return  render_template('/mail/mail_entryApproved.html', entry=entry, in_username=userName, in_firstName=firstName)
 
 
 

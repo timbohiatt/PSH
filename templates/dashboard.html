@@ -3,7 +3,96 @@
 {% block body %} 
 	<section>
 		<div class="container">
-		    <div class="fb-profile">
+			<div class="row">
+
+				<div class="col">
+					<div class="card">
+						<div class="card-body">
+							<div class="row">
+								<div class="col">
+									<img style="height:auto; width:95%;" src="/static/media/MPSH_userProfiles/{{userDetails.userName}}.jpg" alt="Profile image example"/>
+			            		</div>
+			            		<div class="col">
+			            			<h1>{{userDetails.userName}}</h1>
+			            			<h2><b><i>{{userDetails.firstName}} {{userDetails.lastName}}</i></b></h2>
+			            		</div>
+		            		</div>
+						</div>
+					</div>
+				</div>
+				<div class="col">
+					<div class="card">
+						<div class="card-body">
+							<div class="row">
+								<div class="col mb-4" align="center">
+									<h3><b>GAME STATS</b></h3>
+								</div>
+							</div>
+							<div class="row" align="center">
+								<div class="col">
+									<div class="avatar">
+									    <img style="height:auto; width:20%;" src="/static/img/dashboard_entries.png" alt="" />
+									</div>
+									<div class="content">
+									    <p class="dash_text_sub">Entires</p>
+									    <p class="dash_text">{{userStats["totalEntries"]}}</p>		    
+									</div>
+								</div>
+								<div class="col">
+									<div class="avatar">
+									    <img style="height:auto; width:20%;" src="/static/img/dashboard_score.png" alt="" />
+									</div>
+									<div class="content">
+									    <p class="dash_text_sub">Score</p>
+					                    <p class="dash_text">{{userStats["currentScore"]}}</p>
+									</div>
+								</div>
+								<div class="col">
+									<div class="avatar">
+									    <img style="height:auto; width:20%;" src="/static/img/dashboard_rank.png" alt="" />
+									</div>
+									<div class="content">
+									    <p class="dash_text_sub">Score</p>
+					                    <p class="dash_text">{{userStats["currentScore"]}}</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				
+			</div>
+			<br>
+			<div class="row">
+				<div class="col">
+					<div class="card">
+						<div class="card-body">
+							<div class="row" align="center">
+								<div class="col">
+									<h3><b>USER ENTRIES</b></h3>
+								</div>
+							</div>
+							{% for entry in entries %}
+								{% if entry.S3imgThumbURL %}
+					        		<div class="col-lg-3 col-md-4 col-xs-6">
+					          			<a href="#" class="d-block mb-4 mx-auto">
+											<img class="thumb-post img-fluid img-thumbnail" src="/static/media/MPSH_entries/stage/{{entry.S3imgThumbURL}}" alt="">
+										</a>
+									</div>
+								{% endif %}
+				        	{% endfor %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+		
+
+
+
+		 <!--   <div class="fb-profile">
 		        <img align="left" class="fb-image-lg" src="http://lorempixel.com/850/280/nightlife/5/" alt="Profile image example"/>
 		        <img align="left" class="fb-image-profile thumbnail" src="/static/media/MPSH_userProfiles/{{userDetails.userName}}.jpg" alt="Profile image example"/>
 		        <div class="fb-profile-text">
@@ -55,9 +144,10 @@
 				</div> 
 			</div>
 		</div>
-	</section>
+	</section> -->
 
 	<!-- User Entries -->
+	<!--
 	<section>
     	<div class="container">
       		<h1 class="my-4 text-center text-lg-center">Thumbnail Gallery</h1>
@@ -73,15 +163,10 @@
         	{% endfor %}
       		</div>
       	</div>
-	</section>
+	</section> -->
 
 	<!-- User Achievements -->
-	<section>
-		<div class="container">
-			
-		</div>
-	</section>
-
+	
 
 
 	
@@ -90,46 +175,4 @@
 
 
 
-		<div class="container">
-			 <div class="row justify-content-md-center"">
-			 	<div class=".col-xs-12 .col-sm-6 .col-md-8">
-			 		<div class="card">
-					  <!--<img class="card-img-top" src="..." alt="Card image cap">-->
-					  <div class="card-body">
-					    <h4 class="card-title">{{userDetails.userName}}</h4>
-					    <h6 class="card-title"><b><i>{{userDetails.firstName}} {{userDetails.lastName}}</i></b></h6>
-					    <p class="card-text">About {{userDetails.firstName}}: {{userDetails.bio}}</p>
-					    <a href="#" class="btn btn-primary">Go somewhere</a>
-					  </div>
-					</div>
-			 	</div>
-			 	<div class=".col-xs-12 .col-sm-6 .col-md-8">
-			 		<div class="card" style="width: 18rem;">
-					  <!--<img class="card-img-top" src="..." alt="Card image cap">-->
-					  <div class="card-body">
-					    <!--<h5 class="card-title">Card title</h5>-->
-					    <div class="img-thumbnail"><img  alt=""></div>
-					    <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
-					  </div>
-					</div>
-			 	</div>
-			 </div>
-			 <div class="row justify-content-md-center"">
-			 	<div class="col-xs-6 col-md-4">
-			 		<div class="card">
-			 			<h4 class="card-title">Entires</h4>
-			 		</div>
-			 	</div>
-			 	<div class="col-xs-6 col-md-4">
-			 		<div class="card">
-			 			<h4 class="card-title">Current Score</h4>
-			 		</div>
-			 	</div>
-			 	<div class="col-xs-6 col-md-4">
-			 		<div class="card">
-			 			<h4 class="card-title">Competition Position</h4>
-			 		</div>
-			 	</div>
-
-			 </div>
-		</div>
+	
