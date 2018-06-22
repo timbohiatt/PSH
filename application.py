@@ -1614,20 +1614,22 @@ def sqlA_GET_Entries_FILT_compID_approved_tag(in_competitionID, in_tag):
 	#   SysActive = 1
 	#   EntryStatus = "Approved" (NOT 1 = Pending, 2 = In Progress or 4 = Rejected)
 
-	tagID = Tags.query.filter(and_(Tags.competitionID == in_competitionID, Tags.tagText == in_tag, Tags.sysActive==1)).first()
-	tagEntries= EntryTag.query.filter(and_(EntryTag.competitionID == in_competitionID, EntryTag.tag == tagID.id, Tags.sysActive==1)).all()
-	
-	entryIDs = []
-	for entry in tagEntries:
-		entryIDs.append(entry.entry)
-
-	entries = Entry.query.filter(Entry.id.in_(entryIDs))
-
-
 	results = []
-	for entry in entries:
-		if (entry.entryStatus[0].status.id == 3):
-			results.append(entry)
+
+	tagID = Tags.query.filter(and_(Tags.competitionID == in_competitionID, Tags.tagText == in_tag, Tags.sysActive==1)).first()
+	if tagID is not None:
+		tagEntries= EntryTag.query.filter(and_(EntryTag.competitionID == in_competitionID, EntryTag.tag == tagID.id, Tags.sysActive==1)).all()
+	
+		entryIDs = []
+		for entry in tagEntries:
+			entryIDs.append(entry.entry)
+
+			if entryIDs is not None:
+				entries = Entry.query.filter(Entry.id.in_(entryIDs))
+				if entries is not None:
+					for entry in entries:
+						if (entry.entryStatus[0].status.id == 3):
+							results.append(entry)
 		
 	return results
 
