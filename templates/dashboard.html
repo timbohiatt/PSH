@@ -69,19 +69,36 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="row" align="center">
-								<div class="col">
+								<div class="col mb-5">
 									<h3><b>USER ENTRIES</b></h3>
 								</div>
 							</div>
+							<div class="row" align="center">
+							<div class="card-group">
 							{% for entry in entries %}
 								{% if entry.S3imgThumbURL %}
-					        		<div class="col-lg-3 col-md-4 col-xs-6">
-					          			<a href="#" class="d-block mb-4 mx-auto">
-											<img class="thumb-post img-fluid img-thumbnail" src="/static/media/MPSH_entries/stage/{{entry.S3imgThumbURL}}" alt="">
-										</a>
-									</div>
+								<div class="col-lg-3 col-md-4 col-xs-6 d-flex align-items-stretch">
+	          						<a href="#" class="d-block mb-4 mx-auto">
+										<div class="card">
+											<img class="card-img-top" style="height:auto; max-height: auto; min-height: 100px; width:100%; overflow-x: hidden; overflow-y: hidden;" src="{{entry.S3imgThumbURL}}" alt="{{entry.entryStatus[0].status.statusTitle}}">
+											<div class="card-body">
+												{% if ((entry.entryStatus[0].status.id|int) == 1) -%} 
+													<h6 class="card-title alert alert-dark" role="alert">{{entry.entryStatus[0].status.statusTitle}}</h6>
+												{% elif ((entry.entryStatus[0].status.id|int) == 2) -%} 
+													<h6 class="card-title alert alert-primary" role="alert">{{entry.entryStatus[0].status.statusTitle}}</h6>
+												{% elif ((entry.entryStatus[0].status.id|int) == 3) -%} 
+													<h6 class="card-title alert alert-success" role="alert">{{entry.entryStatus[0].status.statusTitle}}</h6>
+												{% elif ((entry.entryStatus[0].status.id|int) == 4) -%} 
+													<h6 class="card-title alert alert-danger" role="alert">{{entry.entryStatus[0].status.statusTitle}}</h6>
+												{%- endif %}
+											</div>
+										</div>
+									</a>
+								</div>
 								{% endif %}
 				        	{% endfor %}
+				       		</div>
+				        	</div>
 						</div>
 					</div>
 				</div>

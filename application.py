@@ -256,7 +256,11 @@ def profile(userID):
 	
 	userDetails = sqlA_GET_User_FILT_id(userID)
 	userStats = sqlA_GET_User_Statistics_FILT_User_CompID(userID, session['competitionID'])
-	userEntries = sqlA_GET_Entries_FILT_compID_approved_userID(session['competitionID'], userID)
+	if (session["userID"] == int(userID))	:
+		userEntries = sqlA_GET_Entries_FILT_compID_userID(session['competitionID'], userID)
+	else:
+		userEntries = sqlA_GET_Entries_FILT_compID_approved_userID(session['competitionID'], userID) 
+
 	return render_template('dashboard.html', entries=userEntries, userDetails=userDetails, userStats=userStats)
 
 
@@ -1583,6 +1587,25 @@ def sqlA_GET_Entries_FILT_compID_entryID(in_competitionID, in_entryID):
 	#
 	return Entry.query.filter(and_(Entry.competitionID == in_competitionID, Entry.id == in_entryID, Entry.sysActive == 1, )).first()
 
+
+def sqlA_GET_Entries_FILT_compID_userID(in_competitionID, in_userID):
+	# Return Entries.
+	# Filter:
+	#   CompetitionID
+	#   SysActive = 1
+	#   EntryStatus = "Approved" (NOT 1 = Pending, 2 = In Progress or 4 = Rejected)
+	selection = Entry.query.filter(
+		and_(
+			Entry.competitionID == in_competitionID,
+			Entry.sysActive == 1,
+			Entry.userID == in_userID,
+		)).order_by(
+		Entry.sysCreated).all()
+	results = []
+	for entry in selection:
+		if (entry.entryStatus[0].status.id != 4):
+			results.append(entry)
+	return results
 
 
 def sqlA_GET_Entries_FILT_compID_approved_userID(in_competitionID, in_userID):
