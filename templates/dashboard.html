@@ -13,8 +13,13 @@
 									<img style="height:auto; width:95%;" src="/static/media/MPSH_userProfiles/{{userDetails.userName}}.jpg" alt="Profile image example"/>
 			            		</div>
 			            		<div class="col">
-			            			<h1>{{userDetails.userName}}</h1>
-			            			<h2><b><i>{{userDetails.firstName}} {{userDetails.lastName}}</i></b></h2>
+			            			<div class="row">
+				            			<h1>{{userDetails.userName}}</h1>
+				            			<h2><b><i>{{userDetails.firstName}} {{userDetails.lastName}}</i></b></h2>
+			            			</div>
+			            			<div class="row">
+			            				<p style="display: flex; justify-content: flex-start;">{{userDetails.bio}}</p>
+			            			</div>
 			            		</div>
 		            		</div>
 						</div>

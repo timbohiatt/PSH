@@ -164,7 +164,7 @@ def entry(entryID):
 
 @application.route('/entries/tags/<string:tag>/')
 def entriesTags(tag):
-	entries = sqlA_GET_Entries_FILT_compID_approved(session['competitionID'])
+	entries = sqlA_GET_Entries_FILT_compID_approved_tag(session['competitionID'], processTag(tag))
 	return render_template('entries.html', entries=entries, entriesAvailable=(len(entries) >= 1), headerEntry=sqlA_GET_Entries_RND())
 
 
@@ -1605,6 +1605,30 @@ def sqlA_GET_Entries_FILT_compID_userID(in_competitionID, in_userID):
 	for entry in selection:
 		if (entry.entryStatus[0].status.id != 4):
 			results.append(entry)
+	return results
+
+def sqlA_GET_Entries_FILT_compID_approved_tag(in_competitionID, in_tag):
+	# Return Entries.
+	# Filter:
+	#   CompetitionID
+	#   SysActive = 1
+	#   EntryStatus = "Approved" (NOT 1 = Pending, 2 = In Progress or 4 = Rejected)
+
+	tagID = Tags.query.filter(and_(Tags.competitionID == in_competitionID, Tags.tagText == in_tag, Tags.sysActive==1)).first()
+	tagEntries= EntryTag.query.filter(and_(EntryTag.competitionID == in_competitionID, EntryTag.tag == tagID.id, Tags.sysActive==1)).all()
+	
+	entryIDs = []
+	for entry in tagEntries:
+		entryIDs.append(entry.entry)
+
+	entries = Entry.query.filter(Entry.id.in_(entryIDs))
+
+
+	results = []
+	for entry in entries:
+		if (entry.entryStatus[0].status.id == 3):
+			results.append(entry)
+		
 	return results
 
 
