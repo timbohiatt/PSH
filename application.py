@@ -253,14 +253,19 @@ def submitEntry():
 @application.route('/profile/<string:userID>')
 @loginStatus
 def profile(userID):
-	
+	msg("Made it to level 1")
 	userDetails = sqlA_GET_User_FILT_id(userID)
+	msg("Test 0.0")
 	userStats = sqlA_GET_User_Statistics_FILT_User_CompID(userID, session['competitionID'])
-	if (session["userID"] == int(userID))	:
+	msg("Test 1.0")
+	if (session["userID"] == int(userID)):
+		msg("Test 1.1")
 		userEntries = sqlA_GET_Entries_FILT_compID_userID(session['competitionID'], userID)
 	else:
+		msg("Test 1.2")
 		userEntries = sqlA_GET_Entries_FILT_compID_approved_userID(session['competitionID'], userID) 
 
+	msg("Test 2.0")
 	return render_template('dashboard.html', entries=userEntries, userDetails=userDetails, userStats=userStats)
 
 
