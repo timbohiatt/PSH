@@ -250,7 +250,7 @@ def submitEntry():
 
 
 
-@application.route('/profile/<string:userID>/')
+@application.route('/profile/<string:userID>')
 @loginStatus
 def profile(userID):
 	
