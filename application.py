@@ -256,17 +256,17 @@ def submitEntry():
 @application.route('/profile2/<string:userID>/')
 @loginStatus
 def profileNew(userID):
-	#msg("Made it to level 1")
-	#userDetails = sqlA_GET_User_FILT_id(userID)
-	#msg("Test 0.0")
-	#serStats = sqlA_GET_User_Statistics_FILT_User_CompID(userID, session['competitionID'])
-	#msg("Test 1.0")
-	#if (session["userID"] == int(userID)):
-	#	msg("Test 1.1")
-	#	userEntries = sqlA_GET_Entries_FILT_compID_userID(session['competitionID'], userID)
-	#else:
-	#	msg("Test 1.2")
-	#	userEntries = sqlA_GET_Entries_FILT_compID_approved_userID(session['competitionID'], userID) 
+	msg("Made it to level 1")
+	userDetails = sqlA_GET_User_FILT_id(userID)
+	msg("Test 0.0")
+	serStats = sqlA_GET_User_Statistics_FILT_User_CompID(userID, session['competitionID'])
+	msg("Test 1.0")
+	if (session["userID"] == int(userID)):
+		msg("Test 1.1")
+		userEntries = sqlA_GET_Entries_FILT_compID_userID(session['competitionID'], userID)
+	else:
+		msg("Test 1.2")
+		userEntries = sqlA_GET_Entries_FILT_compID_approved_userID(session['competitionID'], userID) 
 
 	msg("Profile 2")
 	#return render_template('dashboard.html', entries=userEntries, userDetails=userDetails, userStats=userStats)
