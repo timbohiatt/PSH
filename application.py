@@ -253,9 +253,9 @@ def submitEntry():
 	return render_template('submit.html', form=form, headerEntry=sqlA_GET_Entries_RND())
 
 
-@application.route('/profile2/<int:userID>/')
+@application.route('/profile/<int:userID>/')
 @loginStatus
-def profileNew(userID):
+def profile(userID):
 	msg("Made it to level 1")
 	userDetails = sqlA_GET_User_FILT_id(userID)
 	msg("Test 0.0")
@@ -275,9 +275,9 @@ def profileNew(userID):
 
 
 
-@application.route('/profile/<string:userID>/')
+@application.route('/profile3/<string:userID>/')
 @loginStatus
-def profile(userID):
+def profileNew(userID):
 	msg("Made it to level 1")
 	userDetails = sqlA_GET_User_FILT_id(userID)
 	msg("Test 0.0")
