@@ -257,9 +257,9 @@ def submitEntry():
 @loginStatus
 def profile(userID):
 	userDetails = sqlA_GET_User_FILT_id(userID)
-	if (userDetails is None):
+	if (userDetails.id is None):
 		index()
-		
+
 	userStats = sqlA_GET_User_Statistics_FILT_User_CompID(userID, session['competitionID'])
 	if (session["userID"] == int(userID)):
 		userEntries = sqlA_GET_Entries_FILT_compID_userID(session['competitionID'], userID)
