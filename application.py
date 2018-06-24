@@ -259,7 +259,7 @@ def profileNew(userID):
 	msg("Made it to level 1")
 	userDetails = sqlA_GET_User_FILT_id(userID)
 	msg("Test 0.0")
-	serStats = sqlA_GET_User_Statistics_FILT_User_CompID(userID, session['competitionID'])
+	userStats = sqlA_GET_User_Statistics_FILT_User_CompID(userID, session['competitionID'])
 	msg("Test 1.0")
 	if (session["userID"] == int(userID)):
 		msg("Test 1.1")
