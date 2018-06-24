@@ -104,12 +104,12 @@ def page_not_found(e):
 # View Site Index Page.
 @application.route('/')
 def index():
-	stats = {}
+	#stats = {}
 
-	stats["stats_totalUsers"] = sqlA_GET_CompetitionUser_FUNC_Count()
-	stats["stats_totalEntries"] = sqlA_GET_Entries_FUNC_Count()
+	#stats["stats_totalUsers"] = sqlA_GET_CompetitionUser_FUNC_Count()
+	#stats["stats_totalEntries"] = sqlA_GET_Entries_FUNC_Count()
 
-	return render_template('home.html', headerEntry=sqlA_GET_Entries_RND(), stats=stats )
+	return render_template('home.html', headerEntry=sqlA_GET_Entries_RND())#, stats=stats )
 
 # View the About Page
 
@@ -251,6 +251,26 @@ def submitEntry():
 # 		return redirect(url_for('index', _scheme=application.config["REDIRECT_PARAM"], _external=True))
 
 	return render_template('submit.html', form=form, headerEntry=sqlA_GET_Entries_RND())
+
+
+@application.route('/profile2/<string:userID>/')
+@loginStatus
+def profileNew(userID):
+	#msg("Made it to level 1")
+	#userDetails = sqlA_GET_User_FILT_id(userID)
+	#msg("Test 0.0")
+	#serStats = sqlA_GET_User_Statistics_FILT_User_CompID(userID, session['competitionID'])
+	#msg("Test 1.0")
+	#if (session["userID"] == int(userID)):
+	#	msg("Test 1.1")
+	#	userEntries = sqlA_GET_Entries_FILT_compID_userID(session['competitionID'], userID)
+	#else:
+	#	msg("Test 1.2")
+	#	userEntries = sqlA_GET_Entries_FILT_compID_approved_userID(session['competitionID'], userID) 
+
+	msg("Profile 2")
+	#return render_template('dashboard.html', entries=userEntries, userDetails=userDetails, userStats=userStats)
+	return render_template('home.html', headerEntry=sqlA_GET_Entries_RND())
 
 
 
