@@ -104,7 +104,12 @@ def page_not_found(e):
 # View Site Index Page.
 @application.route('/')
 def index():
-	return render_template('home.html', headerEntry=sqlA_GET_Entries_RND())
+	stats = {}
+
+	stats["stats_totalUsers"] = sqlA_GET_CompetitionUser_FUNC_Count()
+	stats["stats_totalEntries"] = sqlA_GET_Entries_FUNC_Count()
+
+	return render_template('home.html', headerEntry=sqlA_GET_Entries_RND(), stats=stats )
 
 # View the About Page
 
@@ -250,7 +255,7 @@ def submitEntry():
 
 
 
-@application.route('/profile/<string:userID>')
+@application.route('/profile/<string:userID>/')
 @loginStatus
 def profile(userID):
 	msg("Made it to level 1")
@@ -682,13 +687,13 @@ def updateEntryStatus(entry, judgement):
 		if (float(sqlA_GET_Entry_FUNC_Count_FILT_Approvals(entry.id)) /
 				float(competitors)) >= float(competition.judgeMinApprovePercentage):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the % Crowd Sourcing Method"))
-			entry.entryStatus[0].approveEntry()
+			entry.entryStatus[0].approveEntry(session["competitionID"])
 			mail_send_entryApproved(entry.id)
 			return entry
 		# Check if Entry had Met the Required Player % to Reject
 		elif (float(sqlA_GET_Entry_FUNC_Count_FILT_Rejections(entry.id)) / float(competitors)) >= float(competition.judgeMinRejectPercentage):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the % Crowd Sourcing Method"))
-			entry.entryStatus[0].rejectEntry()
+			entry.entryStatus[0].rejectEntry(session["competitionID"])
 			mail_send_entryRejected(entry.id)
 			return entry
 		else:
@@ -698,12 +703,12 @@ def updateEntryStatus(entry, judgement):
 	elif (competition.judgementType == 2):
 		if (judgement == 1):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the Admin Method"))
-			entry.entryStatus[0].approveEntry()
+			entry.entryStatus[0].approveEntry(session["competitionID"])
 			mail_send_entryApproved(entry.id)
 			return entry
 		else:
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the Admin Method"))
-			entry.entryStatus[0].rejectEntry()
+			entry.entryStatus[0].rejectEntry(session["competitionID"])
 			mail_send_entryRejected(entry.id)
 			return entry
 	# Vote Based Approval
@@ -711,17 +716,17 @@ def updateEntryStatus(entry, judgement):
 		# Check if Entry had Met the Required Player Votesto Approve
 		if (float(sqlA_GET_Entry_FUNC_Count_FILT_Approvals(entry.id)) >= float(competition.judgeMinApproveVotes)):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Approved using the Voting Method"))
-			entry.entryStatus[0].approveEntry()
+			entry.entryStatus[0].approveEntry(session["competitionID"])
 			mail_send_entryApproved(entry.id)
 			return entry
 		# Check if Entry had Met the Required Player Votes to Reject
 		elif (float(sqlA_GET_Entry_FUNC_Count_FILT_Rejections(entry.id)) >= float(competition.judgeMinRejectVotes)):
 			msg(str("Entry: (" + str(entry.id) + ") by User: "+str(entry.uploader.userName)+ " is being Rejected using the Voting Method"))
-			entry.entryStatus[0].rejectEntry()
+			entry.entryStatus[0].rejectEntry(session["competitionID"])
 			mail_send_entryRejected(entry.id)
 			return entry
 		else:
-			entry.entryStatus[0].progressEntry()
+			entry.entryStatus[0].progressEntry(session["competitionID"])
 			return entry
 	# No True Approval Method Provided.
 	else:
@@ -1145,13 +1150,28 @@ class Tags(db.Model):
 		self.competitionID = competitionID
 		self.tagText = tagText
 		self.tagType = tagType
-		self.sysActive = 1
+		self.tagCount = 0
+		self.sysActive = 0
 
 	def tagUpdate(self):
 		# Set Entry Status to "In Progress"
 		self.tagCount = (self.tagCount + 1)
+		if (self.tagCount <= 0):
+			self.sysActive = 0
+		else:
+			self.sysActive = 1
+			
 		return
 
+	def tagDowngrade(self):
+		# Set Entry Status to "In Progress"
+		self.tagCount = (self.tagCount - 1)
+		if (self.tagCount <= 0):
+			self.sysActive = 0
+		else:
+			self.sysActive = 1
+
+		return
 
 
 class TagType(db.Model):
@@ -1186,7 +1206,7 @@ class EntryTag(db.Model):
 		self.competitionID = competitionID
 		self.entry = entryID
 		self.tag = tagID
-		self.sysActive = 1
+		self.sysActive = 0
 
 
 class Entry(db.Model):
@@ -1285,15 +1305,25 @@ class EntryStatus(db.Model):
 		self.statusTypeID = 2
 		return
 
-	def approveEntry(self):
+	def approveEntry(self, in_competitionID):
 		# Set Entry Status to "Approved"
+		#Hashtag Manipulation Here.
 		self.statusTypeID = 3
+		activateEntryTags(self.entryID, in_competitionID)
 		return
 
-	def rejectEntry(self):
+	def rejectEntry(self, in_competitionID):
 		# Set Entry Status to "Rejected"
 		self.statusTypeID = 4
+		deactivateEntryTags(self.entryID, in_competitionID)
+		#Hashtag Manipulation Here.
+
 		return
+
+
+
+
+
 
 
 class StatusType(db.Model):
@@ -1515,12 +1545,42 @@ def sqlA_ADD_Tag(entryID, userID, competitionID, tagText, tagType):
 		db.session.commit()
 		tagID = newTag.id
 	else:
-		tag.tagUpdate()
 		tagID = tag.id
 
 	newEntryTag = EntryTag(competitionID, entryID, tagID)
 	db.session.add(newEntryTag)
 	db.session.commit()
+
+
+
+
+def activateEntryTags(entryID, competitionID):
+	EntryTags = EntryTag.query.filter(and_(EntryTag.competitionID==competitionID, EntryTag.entry==entryID)).all()
+
+	for entryTag in EntryTags:
+		tag = Tags.query.filter(and_(Tags.id == entryTag.tag, Tags.competitionID==competitionID)).first()
+		tag.tagUpdate()
+		db.session.add(tag)
+		entryTag.sysActive = 1
+		db.session.add(entryTag)
+
+	db.session.commit()
+	return
+
+def deactivateEntryTags(entryID, competitionID):
+	EntryTags = EntryTag.query.filter(and_(EntryTag.sysActive == 1, EntryTag.competitionID==competitionID, EntryTag.entry==entryID)).all()
+
+	for entryTag in EntryTags:
+		tag = Tags.query.filter(and_(Tags.id == entryTag.tag, Tags.competitionID==competitionID)).first()
+		tag.tagDowngrade()
+		db.session.add(tag)
+		entryTag.sysActive = 0
+		db.session.add(entryTag)
+
+	db.session.commit()	
+
+
+	return
 
 
 
@@ -1556,8 +1616,32 @@ def sqlA_GET_CompetitionUser_FUNC_Count_FILT_compID(in_competitionID):
 	return count
 
 
+def sqlA_GET_CompetitionUser_FUNC_Count():
+	# Return Count of users in a Competition
+	# Filter:
+	#   CompetitionID
+	#   SysActive = 1
+
+	users = db.session.query(User).filter(User.sysActive == 1, )
+	countUsers = users.statement.with_only_columns([db.func.count()]).order_by(None)
+	count = db.session.execute(countUsers).scalar()
+	return count
+
+
 # SQL - GET - Entries
 # =======================================
+
+def sqlA_GET_Entries_FUNC_Count():
+	# Return Count of users in a Competition
+	# Filter:
+	#   SysActive = 1
+
+	entries = db.session.query(Entry).filter(Entry.sysActive == 1, )
+	countEntries = entries.statement.with_only_columns([db.func.count()]).order_by(None)
+	count = db.session.execute(countEntries).scalar()
+	return count
+
+
 def sqlA_GET_Entries_RND():
 	# Return Entries.
 	# Filter:
@@ -1623,7 +1707,7 @@ def sqlA_GET_Entries_FILT_compID_approved_tag(in_competitionID, in_tag):
 
 	tagID = Tags.query.filter(and_(Tags.competitionID == in_competitionID, Tags.tagText == in_tag, Tags.sysActive==1)).first()
 	if tagID is not None:
-		tagEntries= EntryTag.query.filter(and_(EntryTag.competitionID == in_competitionID, EntryTag.tag == tagID.id, Tags.sysActive==1)).all()
+		tagEntries= EntryTag.query.filter(and_(EntryTag.competitionID == in_competitionID, EntryTag.tag == tagID.id, EntryTag.sysActive==1)).all()
 	
 		entryIDs = []
 		for entry in tagEntries:

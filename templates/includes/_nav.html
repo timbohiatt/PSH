@@ -19,13 +19,14 @@
 
         {% if session.loggedIn %}  
         <ul class="nav navbar-nav">
-
+          {%- if request.path == "/" %}
           <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="#about">About</a>
           </li>
           <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="#services">How to play</a>
           </li>
+          {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="/entries">Entries</a>
           </li>

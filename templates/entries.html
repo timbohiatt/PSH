@@ -72,7 +72,9 @@
 		    				<div>
 		    					 <span>
 								    {% for tags in entry.tags %}
-								    	<a href="/entries/tags/{{tags.tagID.tagText}}">#{{tags.tagID.tagText}}</a>,
+								    	{% if ((tags.tagID.sysActive|int) == 1) -%}
+								    		<a href="/entries/tags/{{tags.tagID.tagText}}">#{{tags.tagID.tagText}}</a>,
+								    	{%- endif %}
 								    {% endfor %}
 								</span>
 		    				</div>
