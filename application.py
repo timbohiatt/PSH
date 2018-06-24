@@ -269,8 +269,8 @@ def profileNew(userID):
 		userEntries = sqlA_GET_Entries_FILT_compID_approved_userID(session['competitionID'], userID) 
 
 	msg("Profile 2")
-	#return render_template('dashboard.html', entries=userEntries, userDetails=userDetails, userStats=userStats)
-	return render_template('home.html', headerEntry=sqlA_GET_Entries_RND())
+	return render_template('dashboard.html', entries=userEntries, userDetails=userDetails, userStats=userStats)
+	#return render_template('home.html', headerEntry=sqlA_GET_Entries_RND())
 
 
 
