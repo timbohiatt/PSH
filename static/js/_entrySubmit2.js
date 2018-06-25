@@ -14,12 +14,18 @@
 		var imageUUID = null;
 		var tmpFileName = null;
 		var currentStep = 1;
-		var lastStep = 5;
+		var lastStep = 6;
 		var imageLabels = [];
 		var entryLocation = {};
 		var categoryData = null;
+		var uploadTags = [];
 
 		populateCategories()
+
+
+		$('#formField_tags').tagEditor({delimiter: ', ', animateDelete:100, removeDuplicates:true, forceLowercase:true, maxLength:100, onChange: function(field, editor, tags) {validateEntryData()},placeholder:'Enter Tags..'});
+
+
 
 		$('#previous-step').click(function() {
 			transitionPreviousStep()
@@ -99,6 +105,9 @@
 
 
 
+
+
+
 		function validateEntryData(){
 			valid = false
 
@@ -154,6 +163,7 @@
 					}
 				}
 			}else if (currentStep == 5){
+				uploadTags = $('#formField_tags').tagEditor('getTags')[0].tags;
 				valid = true;
 			}else if (currentStep == 6){
 				valid = true;
@@ -226,7 +236,6 @@
 				$(element).css("display", "None")
 				$("#step-p").css("display", "Block");
 
-				uploadTags = []
 			
 				setTimeout(function(){
 					$(element).fadeOut("slow")
@@ -269,14 +278,24 @@
 		}
 
 		function populateLabels(data){
+
 			data = data["labels"] 
+			for (index = 0; index < data.length; ++index) {
+				label = data[index]["Description"].replace(/ /g,'')
+				label = label.replace(/\|/g,"");
+				console.log(label.length);
+				console.log(label);
+				$('#formField_tags').tagEditor('addTag', label);
+			}
+
+			/*data = data["labels"] 
 			imageLabels = []
 			for (index = 0; index < data.length; ++index) {
 				label = data[index]["Description"].replace(/\s/g,'')
 
 				imageLabels.push(label);
 			}
-
+			*/
 			
 		}
 

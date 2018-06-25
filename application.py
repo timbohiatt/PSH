@@ -265,6 +265,11 @@ def profile(userID):
 		userEntries = sqlA_GET_Entries_FILT_compID_userID(session['competitionID'], userID)
 	else:
 		userEntries = sqlA_GET_Entries_FILT_compID_approved_userID(session['competitionID'], userID) 
+
+	for item in userEntries:
+		print(type(item))
+		print(item)
+
 	return render_template('dashboard.html', entries=userEntries, userDetails=userDetails, userStats=userStats)
 	#return render_template('home.html', headerEntry=sqlA_GET_Entries_RND())
 
@@ -518,9 +523,6 @@ def register_CheckExistingUsername(in_Username):
 
 
 def processEntry(imgPath, filename, UUID):
-	# Analyse the Image using Google Vision to return known information about the image store it within the Database.
-	# Instantiates a client
-	client = vision.ImageAnnotatorClient()
 	# The name of the image file to annotate
 	file_name = str(imgPath)
 
@@ -542,11 +544,18 @@ def processEntry(imgPath, filename, UUID):
 
 def run_googleVision(image):
 
+	# Analyse the Image using Google Vision to return known information about the image store it within the Database.
+	# Instantiates a client
+	client = vision.ImageAnnotatorClient()
+
 	vision_objects = {}
 	vision_children = []
 	vision_children_labels = []
-
-	if(application.config["RUN_GOOGLEVISION"] == True):
+	msg("Trying to Run Google Vision")
+	msg(application.config["RUN_GOOGLEVISION"])
+	msg((application.config["RUN_GOOGLEVISION"] == "True"))
+	if(application.config["RUN_GOOGLEVISION"] == "True"):
+		msg("in the loop")
 		# Performs label detection on the uploaded image
 		response = client.label_detection(image=image)
 		# Build the List of Vision Label Objects
@@ -563,6 +572,7 @@ def run_googleVision(image):
 				vision_label_item["Upload_Display"] = "False"
 			vision_children_labels.append(vision_label_item)
 		
+
 
 	vision_objects["labels"] = vision_children_labels
 	vision_children.append(vision_objects)
